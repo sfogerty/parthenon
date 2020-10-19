@@ -96,6 +96,8 @@ void CheckBoundaryFlag(BoundaryFlag block_flag, CoordinateDirection dir) {
       << "Attempting to set invalid MeshBlock boundary= " << GetBoundaryString(block_flag)
       << "\nin x" << dir + 1 << " direction" << std::endl;
   switch (dir) {
+  case CoordinateDirection::X0DIR:
+    break;
   case CoordinateDirection::X1DIR:
     switch (block_flag) {
     case BoundaryFlag::undef:

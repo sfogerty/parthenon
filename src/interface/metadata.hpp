@@ -76,7 +76,9 @@
   /** Integer-valued quantity */                                                         \
   PARTHENON_INTERNAL_FOR_FLAG(Integer)                                                   \
   /** Real-valued quantity */                                                            \
-  PARTHENON_INTERNAL_FOR_FLAG(Real)
+  PARTHENON_INTERNAL_FOR_FLAG(Real)                                                      \
+  /** Avoid allocation of variables where are all values are zero */                     \
+  PARTHENON_INTERNAL_FOR_FLAG(DenseOnBlock)
 
 namespace parthenon {
 
