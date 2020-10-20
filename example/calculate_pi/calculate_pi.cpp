@@ -68,7 +68,7 @@ std::shared_ptr<StateDescriptor> Initialize(ParameterInput *pin) {
 
   // add a variable called in_or_out that will hold the value of the indicator function
   std::string field_name("in_or_out");
-  Metadata m({Metadata::Cell, Metadata::Derived});
+  Metadata m({Metadata::Cell, Metadata::Derived, Metadata::DenseOnBlock});
   package->AddField(field_name, m, DerivedOwnership::unique);
 
   // Add a named MeshPack by registering a function that packs it

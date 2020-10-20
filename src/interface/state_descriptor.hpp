@@ -108,37 +108,7 @@ class StateDescriptor {
   // field addition / retrieval routines
   // add a field with associated metadata
   bool AddField(const std::string &field_name, Metadata &m,
-                DerivedOwnership owner = DerivedOwnership::unique) {
-    if (m.IsSet(Metadata::Sparse)) {
-      auto miter = sparseMetadataMap_.find(field_name);
-      if (miter != sparseMetadataMap_.end()) {
-        miter->second.push_back(m);
-      } else {
-        sparseMetadataMap_[field_name] = {m};
-      }
-    } else {
-      const std::string &assoc = m.getAssociated();
-      if (!assoc.length()) m.Associate(field_name);
-      auto miter = metadataMap_.find(field_name);
-      if (miter != metadataMap_.end()) { // this field has already been added
-        Metadata &mprev = miter->second;
-        if (owner == DerivedOwnership::unique) {
-          throw std::invalid_argument(
-              "Field " + field_name +
-              " add with DerivedOwnership::unique already exists");
-        }
-        if (mprev != m) {
-          throw std::invalid_argument("Field " + field_name +
-                                      " already exists with different metadata");
-        }
-        return false;
-      } else {
-        metadataMap_[field_name] = m;
-        m.Associate("");
-      }
-    }
-    return true;
-  }
+                DerivedOwnership owner = DerivedOwnership::unique);
 
   void AddMeshBlockPack(const std::string &pack_name, const VarPackingFunc<Real> &func) {
     realVarPackerMap_[pack_name] = func;
