@@ -95,22 +95,22 @@ class ParameterInput {
   std::string GetComment(const std::string & block, const std::string & name);
   int GetInteger(const std::string & block, const std::string & name);
   int GetOrAddInteger(const std::string & block, const std::string & name, int value);
-  int SetInteger(const std::string & block, std::string name, int value);
-  Real GetReal(std::string block, std::string name);
-  Real GetOrAddReal(std::string block, std::string name, Real value);
-  Real GetOrAddPrecise(std::string block, std::string name, Real value);
-  Real SetReal(std::string block, std::string name, Real value);
-  Real SetPrecise(std::string block, std::string name, Real value);
-  bool GetBoolean(std::string block, std::string name);
-  bool GetOrAddBoolean(std::string block, std::string name, bool value);
-  bool SetBoolean(std::string block, std::string name, bool value);
-  std::string GetString(std::string block, std::string name);
-  std::string GetOrAddString(std::string block, std::string name, std::string value);
-  std::string SetString(std::string block, std::string name, std::string value);
+  int SetInteger(const std::string & block, const std::string & name, int value);
+  Real GetReal(const std::string & block, const std::string & name);
+  Real GetOrAddReal(const std::string & block, const std::string & name, Real value);
+  Real GetOrAddPrecise(const std::string & block, const std::string & name, Real value);
+  Real SetReal(const std::string & block, const std::string & name, Real value);
+  Real SetPrecise(const std::string & block, const std::string & name, Real value);
+  bool GetBoolean(const std::string & block, const std::string & name);
+  bool GetOrAddBoolean(const std::string & block, const std::string & name, bool value);
+  bool SetBoolean(const std::string & block, const std::string & name, bool value);
+  std::string GetString(const std::string & block, const std::string & name);
+  std::string GetOrAddString(const std::string & block, const std::string & name, std::string value);
+  std::string SetString(const std::string & block, const std::string & name, std::string value);
   void RollbackNextTime();
   void ForwardNextTime(Real time);
-  void CheckRequired(std::string block, std::string name);
-  void CheckDesired(std::string block, std::string name);
+  void CheckRequired(const std::string & block, const std::string & name);
+  void CheckDesired(const std::string & block, const std::string & name);
 
  private:
   std::string last_filename_; // last input file opened, to prevent duplicate reads
