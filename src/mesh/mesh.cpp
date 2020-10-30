@@ -731,7 +731,7 @@ Mesh::Mesh(ParameterInput *pin, ApplicationInput *app_in, RestartReader &rr,
   int nbe = nbs + nb - 1;
 
   // read in xmin from file
-  auto xmin = rr.ReadDataset<double>("/Blocks/xmin");
+  // auto xmin = rr.ReadDataset<double>("/Blocks/xmin");
 
   // Create MeshBlocks (parallel)
   block_list.clear();

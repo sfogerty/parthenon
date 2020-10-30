@@ -90,12 +90,12 @@ class ParameterInput {
   void LoadFromFile(IOWrapper &input);
   void ModifyFromCmdline(int argc, char *argv[]);
   void ParameterDump(std::ostream &os);
-  int DoesParameterExist(std::string block, std::string name);
-  int DoesBlockExist(std::string block);
-  std::string GetComment(std::string block, std::string name);
-  int GetInteger(std::string block, std::string name);
-  int GetOrAddInteger(std::string block, std::string name, int value);
-  int SetInteger(std::string block, std::string name, int value);
+  int DoesParameterExist(const std::string & block, const std::string & name);
+  int DoesBlockExist(const std::string & block);
+  std::string GetComment(const std::string & block, const std::string & name);
+  int GetInteger(const std::string & block, const std::string & name);
+  int GetOrAddInteger(const std::string & block, const std::string & name, int value);
+  int SetInteger(const std::string & block, std::string name, int value);
   Real GetReal(std::string block, std::string name);
   Real GetOrAddReal(std::string block, std::string name, Real value);
   Real GetOrAddPrecise(std::string block, std::string name, Real value);

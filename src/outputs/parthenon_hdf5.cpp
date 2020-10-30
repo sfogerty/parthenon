@@ -315,10 +315,8 @@ void PHDF5Output::WriteOutputFile(Mesh *pm, ParameterInput *pin, SimTime *tm) {
   auto ciX = ContainerIterator<Real>(pm->block_list.front()->real_containers.Get(),
                                      output_params.variables);
   size_t maxV = 1;
-  hsize_t sumDim4AllVars = 0;
   for (auto &v : ciX.vars) {
     const size_t vlen = v->GetDim(4);
-    sumDim4AllVars += vlen;
     maxV = (maxV < vlen ? vlen : maxV);
   }
 

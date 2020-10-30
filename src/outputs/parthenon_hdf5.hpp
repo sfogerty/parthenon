@@ -188,7 +188,7 @@ static herr_t writeH5AF64(const char *name, const Real *pData, hid_t &file,
   return status;
 }
 
-static herr_t writeH5ASTRING(const char *name, const std::string pData, hid_t &file,
+static herr_t writeH5ASTRING(const char *name, const std::string & pData, hid_t &file,
                              const hid_t &dSpace, const hid_t &dSet) {
   auto atype = H5Tcopy(H5T_C_S1);
   auto status = H5Tset_size(atype, pData.length());

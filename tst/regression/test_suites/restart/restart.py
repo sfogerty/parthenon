@@ -17,7 +17,6 @@
 
 # Modules
 import h5py
-import math
 import numpy as np
 import sys
 import os

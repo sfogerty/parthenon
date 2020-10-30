@@ -19,7 +19,6 @@ from __future__ import print_function
 #**************
 # other imports
 import os
-import sys
 import numpy as np
 import argparse
 

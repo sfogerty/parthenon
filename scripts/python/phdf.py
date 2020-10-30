@@ -18,7 +18,7 @@ import numpy as np
 class phdf:
     """A reader for the new HDF5 output.  Reads in a hdf5 file which
     is the only argument to the constructor.
-    
+
     Class Attributes:
             Filename: Name of file that was read
                 Time: Simulation time
@@ -215,7 +215,6 @@ class phdf:
         [iz, iy, ix] = self.BlockIdx[bidx]
         return [ib,bidx,iz,iy,ix]
 
-#    def isPointInBlock(self, 
     def findIndexInOther(self,other,idx,tol=1e-10,verbose=0):
         """
         Given an index in my data, find the index in a different file.
@@ -267,7 +266,7 @@ class phdf:
             
             iCell1 = ix1 + other.MeshBlockSize[0]*(iy1 + iz1*other.MeshBlockSize[1])
             idx1 = ib1*other.CellsPerBlock + iCell1
-            return [idx1, ib1, iCell1, iz1, iy1, ix1] 
+            return [idx1, ib1, iCell1, iz1, iy1, ix1]
 
         if verbose:
             print('ox=')

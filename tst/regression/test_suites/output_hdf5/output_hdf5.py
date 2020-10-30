@@ -16,8 +16,6 @@
 #========================================================================================
 
 # Modules
-import math
-import numpy as np
 import sys
 import os
 import utils.test_case

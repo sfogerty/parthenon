@@ -324,8 +324,7 @@ void MeshRefinement::RestrictFieldX3(const ParArrayND<Real> &fine,
   std::shared_ptr<MeshBlock> pmb = GetBlockPointer();
   auto &coords = pmb->coords;
   const IndexDomain interior = IndexDomain::interior;
-  int si = (csi - pmb->c_cellbounds.is(interior)) * 2 + pmb->cellbounds.is(interior),
-      ei = (cei - pmb->c_cellbounds.is(interior)) * 2 + pmb->cellbounds.is(interior) + 1;
+  int si = (csi - pmb->c_cellbounds.is(interior)) * 2 + pmb->cellbounds.is(interior);
 
   // store the restricted data in the prolongation buffer for later use
   if (pmb->block_size.nx3 > 1) { // 3D
@@ -850,8 +849,7 @@ void MeshRefinement::ProlongateInternalField(FaceField &fine, int si, int ei, in
   std::shared_ptr<MeshBlock> pmb = GetBlockPointer();
   auto &coords = pmb->coords;
   const IndexDomain interior = IndexDomain::interior;
-  int fsi = (si - pmb->c_cellbounds.is(interior)) * 2 + pmb->cellbounds.is(interior),
-      fei = (ei - pmb->c_cellbounds.is(interior)) * 2 + pmb->cellbounds.is(interior) + 1;
+  int fsi = (si - pmb->c_cellbounds.is(interior)) * 2 + pmb->cellbounds.is(interior);
   if (pmb->block_size.nx3 > 1) {
     for (int k = sk; k <= ek; k++) {
       int fk = (k - pmb->c_cellbounds.ks(interior)) * 2 + pmb->cellbounds.ks(interior);

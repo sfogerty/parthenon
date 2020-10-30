@@ -26,25 +26,25 @@ namespace parthenon {
 /// The new version of Add that takes the fourth dimension from
 /// the metadata structure
 template <typename T>
-void Container<T>::Add(const std::string label, const Metadata &metadata) {
+void Container<T>::Add(const std::string & label, const Metadata &metadata) {
   // generate the vector and call Add
   const std::vector<int> &dims = metadata.Shape();
   Add(label, metadata, dims);
 }
 
 template <typename T>
-void Container<T>::Add(const std::vector<std::string> labelArray,
+void Container<T>::Add(const std::vector<std::string> & labelArray,
                        const Metadata &metadata) {
   // generate the vector and call Add
-  for (auto label : labelArray) {
+  for (const auto & label : labelArray) {
     Add(label, metadata);
   }
 }
 
 template <typename T>
-void Container<T>::Add(const std::vector<std::string> labelArray,
-                       const Metadata &metadata, const std::vector<int> dims) {
-  for (auto label : labelArray) {
+void Container<T>::Add(const std::vector<std::string> & labelArray,
+                       const Metadata &metadata, const std::vector<int> & dims) {
+  for (const auto & label : labelArray) {
     Add(label, metadata, dims);
   }
 }
@@ -58,7 +58,7 @@ void Container<T>::Add(const std::vector<std::string> labelArray,
 /// @param metadata the metadata associated with the variable
 template <typename T>
 void Container<T>::Add(const std::string label, const Metadata &metadata,
-                       const std::vector<int> dims) {
+                       const std::vector<int> & dims) {
   std::array<int, 6> arrDims;
   calcArrDims_(arrDims, dims, metadata);
 
@@ -463,7 +463,7 @@ Container<T>::MakeList_(const std::vector<MetadataFlag> &flags,
 // TODO(JMM): this could be cleaned up, I think.
 // Maybe do only one loop, or do the cleanup at the end.
 template <typename T>
-void Container<T>::Remove(const std::string label) {
+void Container<T>::Remove(const std::string & label) {
   throw std::runtime_error("Container<T>::Remove not yet implemented");
 }
 

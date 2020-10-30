@@ -91,8 +91,8 @@ class Container {
   /// @param metadata the metadata associated with the variable
   /// @param dims the size of each element
   ///
-  void Add(const std::string label, const Metadata &metadata,
-           const std::vector<int> dims);
+  void Add(const std::string & label, const Metadata &metadata,
+           const std::vector<int> & dims);
 
   ///
   /// Allocate and add a variable<T> to the container
@@ -105,8 +105,8 @@ class Container {
   /// @param metadata the metadata associated with the variable
   /// @param dims the size of each element
   ///
-  void Add(const std::vector<std::string> labelVector, const Metadata &metadata,
-           const std::vector<int> dims);
+  void Add(const std::vector<std::string> & labelVector, const Metadata &metadata,
+           const std::vector<int> & dims);
 
   ///
   /// Allocate and add a variable<T> to the container
@@ -130,7 +130,7 @@ class Container {
   /// @param labelVector the array of names of variables
   /// @param metadata the metadata associated with the variable
   ///
-  void Add(const std::vector<std::string> labelVector, const Metadata &metadata);
+  void Add(const std::vector<std::string> & labelVector, const Metadata &metadata);
 
   void Add(std::shared_ptr<CellVariable<T>> var) {
     varVector_.push_back(var);
@@ -211,7 +211,7 @@ class Container {
     return *(it->second);
   }
 
-  ParArrayND<Real> &GetFace(std::string label, int dir) {
+  ParArrayND<Real> &GetFace(const std::string & label, int dir) {
     return GetFace(label).Get(dir);
   }
 
@@ -263,7 +263,7 @@ class Container {
   /// Remove a variable from the container or throw exception if not
   /// found.
   /// @param label the name of the variable to be deleted
-  void Remove(const std::string label);
+  void Remove(const std::string & label);
 
   /// Print list of labels in container
   void Print();

@@ -15,7 +15,6 @@
 # the public, perform publicly and display publicly, and to permit others to do so.
 #========================================================================================
 
-import errno
 import os
 from shutil import rmtree
 import subprocess
@@ -54,12 +53,12 @@ class TestManager:
 
         self.__run_coverage = kwargs.pop('coverage')
         self.parameters = Parameters()
-        self.__run_test_py_path = run_test_path 
+        self.__run_test_py_path = run_test_path
         self.__regression_test_suite_path = os.path.join(self.__run_test_py_path,'test_suites')
         test_dir = kwargs.pop('test_dir')
         parthenon_driver = kwargs.pop('driver')
         parthenon_driver_input = kwargs.pop('driver_input')
-        self.parameters.kokkos_args = ' '.join(kwargs.pop('kokkos_args')).split() 
+        self.parameters.kokkos_args = ' '.join(kwargs.pop('kokkos_args')).split()
         mpi_executable = kwargs.pop('mpirun')
 
         self.__initial_working_dir = os.getcwd()
@@ -134,15 +133,15 @@ class TestManager:
         if not os.path.isdir(test_dir):
             if not os.path.isdir( os.path.join('test_suites',test_dir)):
                 error_msg = "Regression test folder is unknown: " + test_dir + "\n"
-                error_msg +="looked in:\n" 
-                error_msg += "  tst/regression/test_suites/" + test_dir + "\n" 
+                error_msg +="looked in:\n"
+                error_msg += "  tst/regression/test_suites/" + test_dir + "\n"
                 error_msg += "  " + test_dir + "\n"
                 error_msg += "Each regression test must have a folder in "
                 error_msg += "tst/regression/test_suites.\n"
                 error_msg += "Known tests folders are:"
                 known_test_folders = os.listdir(self.__regression_test_suite_path)
                 for folder in known_test_folders:
-                    error_msg += "\n  " + folder 
+                    error_msg += "\n  " + folder
 
                 raise TestManagerError(error_msg)
             else:
@@ -197,7 +196,7 @@ class TestManager:
         if self.parameters.mpi_cmd != "":
             run_command.extend(self.parameters.mpi_cmd)
         for opt in self.parameters.mpi_opts:
-            run_command.extend(opt.split()) 
+            run_command.extend(opt.split())
         run_command.append(self.parameters.driver_path)
         if not '-r' in self.parameters.driver_cmd_line_args:
             run_command.append('-i')
@@ -219,7 +218,7 @@ class TestManager:
             print("*****************************************************************")
             print("Test Case Ignored for Calculating Coverage")
             print("*****************************************************************\n")
-            return 
+            return
         else:
             return 
 

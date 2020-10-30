@@ -176,7 +176,7 @@ class Metadata {
 
   /// returns a metadata with bits, shape, and sparse ID set
   explicit Metadata(const std::vector<MetadataFlag> &bits, int sparse_id,
-                    std::vector<int> shape)
+                    const std::vector<int> & shape)
       : shape_(shape), sparse_id_(sparse_id) {
     SetMultiple(bits);
   }

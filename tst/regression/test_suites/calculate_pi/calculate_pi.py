@@ -60,7 +60,7 @@ class TestCase(utils.test_case.TestCaseAbs):
         This function is called after the driver has been executed. It is
         responsible for reading whatever data it needs and making a judgment
         about whether or not the test passes. It takes no inputs. Output should
-        be True (test passes) or False (test fails).  
+        be True (test passes) or False (test fails).
 
         The parameters that are passed in provide the paths to relevant
         locations and commands. Of particular importance is the path to the
@@ -87,10 +87,10 @@ class TestCase(utils.test_case.TestCaseAbs):
         words1 = line1.split()
         pi_val = float(words1[2])
 
-        error_abs_e = math.fabs( math.pi - pi_val ) / math.pi  
+        error_abs_e = math.fabs( math.pi - pi_val ) / math.pi
 
         analyze_status = True
         if (error_abs_e > 0.001 ) or np.isnan(error_abs_e):
             analyze_status = False
-        
+ 
         return analyze_status

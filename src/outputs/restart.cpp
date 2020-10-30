@@ -60,8 +60,6 @@ std::string RestartReader::ReadAttrString(const char *dataset, const char *name,
 #ifdef HDF5OUTPUT
   herr_t status;
 
-  hid_t theHdfType = H5T_C_S1;
-
   hid_t dset = H5Dopen2(fh_, dataset, H5P_DEFAULT);
   hid_t attr = H5Aopen(dset, name, H5P_DEFAULT);
   hid_t dataspace = H5Aget_space(attr);
