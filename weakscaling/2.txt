@@ -1,0 +1,477 @@
+Reading Profile files in profile.*
+
+FUNCTION SUMMARY (total):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call 
+---------------------------------------------------------------------------------------
+100.0        44903       440060           2      204528  220030077 .TAU application
+ 59.3         1.58       260942           2         100  130471121 Driver_Main
+ 59.3         8127       260742          20      258210   13037119 MultiStage_Step
+ 35.9        77463       158159       20704      577856       7639 Task_SendBoundaryBuffers_MeshBlockData
+ 23.8         8348       104858           4       91458   26214517 Mesh::Initialize
+ 17.2        75811        75811      511136           0        148 Kokkos::parallel_for PackData 4D [device=33554432]
+ 15.0        0.679        65953          24          26    2748030 LoadBalancingAndAdaptiveMeshRefinement
+ 14.7         7341        64750       16400      403760       3948 Task_SetBoundaries_MeshBlockData
+ 14.7        64485        64485      511136           0        126 Kokkos::parallel_for UnpackData 4D [device=33554432]
+ 14.5         18.3        63889           2        1658   31944460 RedistributeAndRefineMeshBlocks
+  9.4        21934        41468           2      126712   20733838 Step 7: Construct new MeshBlockList
+  6.4          765        28066       20704       62112       1356 Task_ProlongateBoundaries
+  5.5        24081        24081      181824           0        132 Kokkos::parallel_for RestrictCellCenteredValues3d [device=33554432]
+  5.1         2950        22563       20704      152256       1090 RestrictBoundaries
+  3.4          762        15115       20710       62130        730 Task_FillDerived
+  3.0         1947        13215        4304      115488       3070 Task_ReceiveAndSetBoundariesWithWait
+  1.8         1083         7793       16400       49200        475 Task_Advection_CalculateFluxes
+  1.1         2105         4909       20710       25888        237 PostFillDerived
+  1.1         2056         4879       20710       25888        236 FillDerived
+  1.0         2048         4564       20710       25888        220 PreFillDerived
+  1.0          744         4551       20704       29568        220 ProlongateBoundaries
+  1.0         4253         4253       45264           0         94 MPI_Wait() 
+  0.9         3910         3910       30272           0        129 Kokkos::parallel_for ProlongateCellCenteredValues3d [device=33554432]
+  0.9          483         3745       16400       16400        228 Task_Tag_Block
+  0.8         3694         3694       19064           0        194 Kokkos::parallel_reduce advection check refinement [device=0]
+  0.7          524         2970       18040       18040        165 Task_EstimateTimestep
+  0.6         1727         2611          40       11532      65278 Task_WeightedSumData
+  0.6         2464         2464       16400           0        150 Kokkos::parallel_for x3 flux [device=33554432]
+  0.6         2464         2464       16400           0        150 Kokkos::parallel_for x2 flux [device=33554432]
+  0.6         2446         2446       18040           0        136 Kokkos::parallel_reduce advection_package::EstimateTimestep [device=0]
+  0.6         1446         2437       16400        7360        149 Task_SendFluxCorrection
+  0.5         2299         2299       20704           0        111 Kokkos::parallel_for advection_package::SquareIt [device=33554432]
+  0.5         2296         2296       20704           0        111 Kokkos::parallel_for advection_package::PostFill [device=33554432]
+  0.5         3.94         2063          24          54      85963 UpdateMeshBlockTree
+  0.5         2059         2059          48           0      42893 MPI_Allgather() 
+  0.5         1992         1992       20704           0         96 Kokkos::parallel_for advection_package::PreFill [device=33554432]
+  0.4         1781         1781       16400           0        109 Kokkos::parallel_for x1 flux [device=33554432]
+  0.3          288         1304       17210        7360         76 Task_ReceiveFluxCorrection
+  0.3          331         1290       21156      134590         61 Task_ReceiveBoundaryBuffers_MeshBlockData
+  0.2         1078         1078       11744           0         92 Kokkos::parallel_for Kokkos::View::initialization [MakePack::sparse_assoc] [device=0]
+  0.2         1072         1072       11744           0         91 Kokkos::parallel_for Kokkos::View::initialization [MakePack::vector_component] [device=0]
+  0.2         1054         1054       11744           0         90 Kokkos::parallel_for Kokkos::View::initialization [MakePack::cv] [device=0]
+  0.1          621          621        4480           0        139 Kokkos::parallel_for ReceiveFluxCorrection_x1 [device=33554432]
+  0.1          549          549        3456           0        159 Kokkos::parallel_for Kokkos::View::initialization [recv buf 21] [device=0]
+  0.1          539          539       11744           0         46 Kokkos::parallel_for Kokkos::View::destruction [MakePack::cv] [device=0]
+  0.1          539          539        3456           0        156 Kokkos::parallel_for Kokkos::View::initialization [send buf 22] [device=0]
+  0.1          538          538        3456           0        156 Kokkos::parallel_for Kokkos::View::initialization [send buf 14] [device=0]
+  0.1          535          535        3456           0        155 Kokkos::parallel_for Kokkos::View::initialization [recv buf 22] [device=0]
+  0.1          533          533        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 2] [device=0]
+  0.1          532          532        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 23] [device=0]
+  0.1          532          532        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 1] [device=0]
+  0.1          532          532        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 3] [device=0]
+  0.1          532          532        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 19] [device=0]
+  0.1          532          532        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 2] [device=0]
+  0.1          532          532        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 11] [device=0]
+  0.1          531          531        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 19] [device=0]
+  0.1          531          531        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 1] [device=0]
+  0.1          531          531       67295           0          8 MPI_Iprobe() 
+  0.1          530          530        3456           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 3] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 4] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 12] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 11] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 10] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 12] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 18] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 13] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 20] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 20] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 13] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 4] [device=0]
+  0.1          530          530        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 9] [device=0]
+  0.1          529          529        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 9] [device=0]
+  0.1          529          529        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 8] [device=0]
+  0.1          529          529        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 10] [device=0]
+  0.1          529          529        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 6] [device=0]
+  0.1          529          529        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 23] [device=0]
+  0.1          529          529        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 14] [device=0]
+  0.1          528          528        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 0] [device=0]
+  0.1          528          528        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 21] [device=0]
+  0.1          528          528        3456           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 18] [device=0]
+  0.1          527          527        3368           0        156 Kokkos::parallel_for Kokkos::View::initialization [advected] [device=0]
+  0.1          527          527        3456           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 0] [device=0]
+  0.1          526          526        3456           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 8] [device=0]
+  0.1          525          525        3456           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 5] [device=0]
+  0.1          525          525        3456           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 17] [device=0]
+  0.1          524          524        3456           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 15] [device=0]
+  0.1          522          522        3456           0        151 Kokkos::parallel_for Kokkos::View::initialization [recv buf 7] [device=0]
+  0.1          521          521        3456           0        151 Kokkos::parallel_for Kokkos::View::initialization [recv buf 5] [device=0]
+  0.1          521          521        3456           0        151 Kokkos::parallel_for Kokkos::View::initialization [send buf 17] [device=0]
+  0.1          520          520        3456           0        150 Kokkos::parallel_for Kokkos::View::initialization [recv buf 15] [device=0]
+  0.1          519          519        3456           0        150 Kokkos::parallel_for Kokkos::View::initialization [recv buf 16] [device=0]
+  0.1          518          518        3456           0        150 Kokkos::parallel_for Kokkos::View::initialization [send buf 16] [device=0]
+  0.1          517          517        3456           0        150 Kokkos::parallel_for Kokkos::View::initialization [send buf 6] [device=0]
+  0.1          517          517        3456           0        150 Kokkos::parallel_for Kokkos::View::initialization [send buf 7] [device=0]
+  0.1          434          510       20704       37152         25 Task_StartReceiving
+  0.1          433          493       20704       37152         24 Task_ClearBoundary
+  0.1          492          492       74304           0          7 MPI_Start() 
+  0.1          428          428       67295           0          6 MPI_Test() 
+  0.1          398          398        2880           0        138 Kokkos::parallel_for SendFluxCorrection3D_x3 [device=33554432]
+  0.1          396          396        2880           0        137 Kokkos::parallel_for ReceiveFluxCorrection_x2 [device=33554432]
+  0.1          385          385        2880           0        134 Kokkos::parallel_for SendFluxCorrection3D_x2 [device=33554432]
+  0.1          383          383       41408           0          9 Task_ApplyBoundaryConditionsOnCoarseOrFine
+  0.1          360          367           2           6     183621 MPI_Finalize() 
+  0.1          297          297           2           4     148619 MPI_Init_thread() 
+  0.1          280          280        3280           0         85 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::cv] [device=0]
+  0.1          279          279        3280           0         85 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::vector_component] [device=0]
+  0.1          275          275        3280           0         84 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::f3] [device=0]
+  0.1          275          275        3280           0         84 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::f2] [device=0]
+  0.1          271          271        3280           0         83 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::f1] [device=0]
+  0.1          271          271        1728           0        157 Kokkos::parallel_for Kokkos::View::initialization [recv buf 36] [device=0]
+  0.1          271          271        1728           0        157 Kokkos::parallel_for Kokkos::View::initialization [recv buf 27] [device=0]
+  0.1          269          269        1728           0        156 Kokkos::parallel_for Kokkos::View::initialization [recv buf 31] [device=0]
+  0.1          269          269        1728           0        156 Kokkos::parallel_for Kokkos::View::initialization [recv buf 35] [device=0]
+  0.1          269          269        1728           0        156 Kokkos::parallel_for Kokkos::View::initialization [one_minus_sqrt_one_minus_advected_sq_37] [device=0]
+  0.1          269          269        1728           0        156 Kokkos::parallel_for Kokkos::View::initialization [one_minus_sqrt_one_minus_advected_sq_12] [device=0]
+  0.1          269          269        1728           0        156 Kokkos::parallel_for Kokkos::View::initialization [one_minus_advected_sq] [device=0]
+  0.1          268          268        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [advected.fluxX3] [device=0]
+  0.1          268          268        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [recv buf 49] [device=0]
+  0.1          268          268        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [advected.fluxX2] [device=0]
+  0.1          268          268        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:183] [device=0]
+  0.1          268          268        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:184] [device=0]
+  0.1          267          267        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [send buf 50] [device=0]
+  0.1          267          267        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [advected.fluxX1] [device=0]
+  0.1          267          267        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [send buf 49] [device=0]
+  0.1          267          267        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [one_minus_advected] [device=0]
+  0.1          267          267        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [recv buf 50] [device=0]
+  0.1          267          267        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:179] [device=0]
+  0.1          267          267        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:182] [device=0]
+  0.1          267          267        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:181] [device=0]
+  0.1          267          267        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:178] [device=0]
+  0.1          267          267        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 25] [device=0]
+  0.1          267          267        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 48] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 39] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/bvals/bvals_base.cpp:116] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 30] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 37] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 48] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/bvals/bvals_base.cpp:117] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 40] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 40] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 39] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 44] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 38] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 43] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 29] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 41] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 41] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 38] [device=0]
+  0.1          265          265        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [advected.coarse] [device=0]
+  0.1          265          265        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 44] [device=0]
+  0.1          265          265        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 43] [device=0]
+  0.1          265          265        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 54] [device=0]
+  0.1          265          265        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 29] [device=0]
+  0.1          265          265        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 51] [device=0]
+  0.1          265          265        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 45] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 37] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 28] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 30] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 42] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 28] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 53] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 42] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 36] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 34] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 45] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 35] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 53] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 34] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 52] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 33] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 31] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 33] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 47] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 25] [device=0]
+  0.1          264          264        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 27] [device=0]
+  0.1          263          263        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 51] [device=0]
+  0.1          263          263        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 54] [device=0]
+  0.1          263          263        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 55] [device=0]
+  0.1          263          263        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 26] [device=0]
+  0.1          263          263        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 52] [device=0]
+  0.1          263          263        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 32] [device=0]
+  0.1          262          262        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 46] [device=0]
+  0.1          262          262        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 24] [device=0]
+  0.1          262          262        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 26] [device=0]
+  0.1          262          262        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 46] [device=0]
+  0.1          262          262        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 24] [device=0]
+  0.1          262          262        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 55] [device=0]
+  0.1          262          262        1728           0        151 Kokkos::parallel_for Kokkos::View::initialization [send buf 32] [device=0]
+  0.1          261          261        1728           0        151 Kokkos::parallel_for Kokkos::View::initialization [send buf 47] [device=0]
+  0.1          231          231        3280           0         71 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::sparse_assoc] [device=0]
+  0.0          209          209        1600           0        130 Kokkos::parallel_for SendFluxCorrection3D_x1 [device=33554432]
+  0.0          106          106        2664           0         40 SearchAndSetNeighbors
+  0.0          102          102        3280           0         31 Kokkos::parallel_for Kokkos::View::destruction [MakeFluxPack::f1] [device=0]
+  0.0          100          100        3280           0         31 Kokkos::parallel_for Kokkos::View::destruction [MakeFluxPack::f2] [device=0]
+  0.0         96.8         96.8        3280           0         30 Kokkos::parallel_for Kokkos::View::destruction [MakeFluxPack::f3] [device=0]
+  0.0         94.3         94.3        3280           0         29 Kokkos::parallel_for Kokkos::View::destruction [MakeFluxPack::cv] [device=0]
+  0.0         73.7         73.7         704           0        105 Kokkos::parallel_for FillSameRankCoarseToFineAMR [device=33554432]
+  0.0         45.7         45.7       32448           0          1 MPI_Request_free() 
+  0.0         44.7         44.7          40           0       1117 Kokkos::parallel_for WeightedSumData [device=33554432]
+  0.0         29.9         29.9          20           0       1496 Kokkos::parallel_for FluxDivergenceMesh [device=33554432]
+  0.0         25.1         25.1       16224           0          2 MPI_Send_init() 
+  0.0         14.4         14.4       16224           0          1 MPI_Recv_init() 
+  0.0         8.47         8.47           2           0       4234 MPI_File_open()
+  0.0         7.35         7.35           4           0       1837 pthread_join
+  0.0         1.99         1.99           4           0        497 MPI_Bcast() 
+  0.0         1.99         1.99           6           0        331 Kokkos::parallel_for Kokkos::View::destruction [MeshData::PackVariables::packs_mirror] [device=0]
+  0.0         1.88         1.88           1           1       1883 MPI_File_read()
+  0.0        0.936        0.936           2           0        468 MPI_File_close()
+  0.0        0.915        0.915           6           0        152 Kokkos::parallel_for Kokkos::View::initialization [MeshData::PackVariables::coords] [device=0]
+  0.0        0.801        0.801          42           0         19 MPI_Allreduce() 
+  0.0        0.768        0.768           6           0        128 Kokkos::parallel_for Kokkos::View::destruction [MeshData::PackVariables::coords] [device=0]
+  0.0        0.764        0.764           6           0        127 Kokkos::parallel_for Kokkos::View::initialization [MeshData::PackVariables::packs] [device=0]
+  0.0        0.622        0.622           6           0        104 Kokkos::parallel_for Kokkos::View::destruction [MeshData::PackVariables::packs] [device=0]
+  0.0        0.297        0.297           6           0         50 MPI_Allgatherv() 
+  0.0        0.253        0.253          24           0         11 MakeOutputs
+  0.0        0.244        0.244           8           0         30 pthread_create
+  0.0        0.128        0.128           6           0         21 Kokkos::parallel_for Kokkos::View::initialization [MeshData::PackVariables::packs_mirror] [device=0]
+  0.0        0.121        0.121           6           0         20 Kokkos::parallel_for Kokkos::View::initialization [MeshData::PackVariables::coords_mirror] [device=0]
+  0.0        0.101        0.101           2           0         50 Step1: Construct new list
+  0.0        0.087        0.087           6           0         14 Kokkos::parallel_for Kokkos::View::destruction [MeshData::PackVariables::coords_mirror] [device=0]
+  0.0        0.081        0.081           4           0         20 CalculateLoadBalance
+  0.0        0.028        0.028           2           0         14 Step 3: Count blocks
+  0.0        0.028        0.028           2           0         14 Step 8: Recv data and unpack
+  0.0        0.022        0.022           2           0         11 MPI_File_seek()
+  0.0        0.022        0.022           2           0         11 Step 4: Calc buffer sizes
+  0.0        0.021        0.021           2           0         10 Step 5: Alloc buffer and start recv
+  0.0        0.021        0.021           2           0         10 Step 6: Alloc, pack, and send buffers
+  0.0        0.019        0.019           2           0         10 MPI_Type_free_keyval()
+  0.0        0.004        0.004           1           0          4 MPI_Status_set_elements()
+  0.0        0.002        0.002           2           0          1 MPI_Comm_rank() 
+  0.0        0.002        0.002           2           0          1 MPI_Comm_size() 
+  0.0        0.002        0.002           1           0          2 MPI_Get_count() 
+
+FUNCTION SUMMARY (mean):
+---------------------------------------------------------------------------------------
+%Time    Exclusive    Inclusive       #Call      #Subrs  Inclusive Name
+              msec   total msec                          usec/call 
+---------------------------------------------------------------------------------------
+100.0        22452       220030           1      102264  220030077 .TAU application
+ 59.3        0.791       130471           1          50  130471121 Driver_Main
+ 59.3         4063       130371          10      129105   13037119 MultiStage_Step
+ 35.9        38732        79079       10352      288928       7639 Task_SendBoundaryBuffers_MeshBlockData
+ 23.8         4174        52429           2       45729   26214517 Mesh::Initialize
+ 17.2        37906        37906      255568           0        148 Kokkos::parallel_for PackData 4D [device=33554432]
+ 15.0        0.340        32976          12          13    2748030 LoadBalancingAndAdaptiveMeshRefinement
+ 14.7         3670        32375        8200      201880       3948 Task_SetBoundaries_MeshBlockData
+ 14.7        32242        32242      255568           0        126 Kokkos::parallel_for UnpackData 4D [device=33554432]
+ 14.5         9.14        31944           1         829   31944460 RedistributeAndRefineMeshBlocks
+  9.4        10967        20734           1       63356   20733838 Step 7: Construct new MeshBlockList
+  6.4          382        14033       10352       31056       1356 Task_ProlongateBoundaries
+  5.5        12041        12041       90912           0        132 Kokkos::parallel_for RestrictCellCenteredValues3d [device=33554432]
+  5.1         1475        11281       10352       76128       1090 RestrictBoundaries
+  3.4          381         7557       10355       31065        730 Task_FillDerived
+  3.0          973         6608        2152       57744       3070 Task_ReceiveAndSetBoundariesWithWait
+  1.8          542         3896        8200       24600        475 Task_Advection_CalculateFluxes
+  1.1         1052         2455       10355       12944        237 PostFillDerived
+  1.1         1028         2439       10355       12944        236 FillDerived
+  1.0         1024         2282       10355       12944        220 PreFillDerived
+  1.0          372         2275       10352       14784        220 ProlongateBoundaries
+  1.0         2127         2127       22632           0         94 MPI_Wait() 
+  0.9         1955         1955       15136           0        129 Kokkos::parallel_for ProlongateCellCenteredValues3d [device=33554432]
+  0.9          242         1872        8200        8200        228 Task_Tag_Block
+  0.8         1847         1847        9532           0        194 Kokkos::parallel_reduce advection check refinement [device=0]
+  0.7          262         1485        9020        9020        165 Task_EstimateTimestep
+  0.6          863         1306          20        5766      65278 Task_WeightedSumData
+  0.6         1232         1232        8200           0        150 Kokkos::parallel_for x3 flux [device=33554432]
+  0.6         1232         1232        8200           0        150 Kokkos::parallel_for x2 flux [device=33554432]
+  0.6         1223         1223        9020           0        136 Kokkos::parallel_reduce advection_package::EstimateTimestep [device=0]
+  0.6          723         1219        8200        3680        149 Task_SendFluxCorrection
+  0.5         1150         1150       10352           0        111 Kokkos::parallel_for advection_package::SquareIt [device=33554432]
+  0.5         1148         1148       10352           0        111 Kokkos::parallel_for advection_package::PostFill [device=33554432]
+  0.5         1.97         1032          12          27      85963 UpdateMeshBlockTree
+  0.5         1029         1029          24           0      42893 MPI_Allgather() 
+  0.5          996          996       10352           0         96 Kokkos::parallel_for advection_package::PreFill [device=33554432]
+  0.4          891          891        8200           0        109 Kokkos::parallel_for x1 flux [device=33554432]
+  0.3          144          652        8605        3680         76 Task_ReceiveFluxCorrection
+  0.3          166          645       10578       67295         61 Task_ReceiveBoundaryBuffers_MeshBlockData
+  0.2          539          539        5872           0         92 Kokkos::parallel_for Kokkos::View::initialization [MakePack::sparse_assoc] [device=0]
+  0.2          536          536        5872           0         91 Kokkos::parallel_for Kokkos::View::initialization [MakePack::vector_component] [device=0]
+  0.2          527          527        5872           0         90 Kokkos::parallel_for Kokkos::View::initialization [MakePack::cv] [device=0]
+  0.1          311          311        2240           0        139 Kokkos::parallel_for ReceiveFluxCorrection_x1 [device=33554432]
+  0.1          274          274        1728           0        159 Kokkos::parallel_for Kokkos::View::initialization [recv buf 21] [device=0]
+  0.1          270          270        5872           0         46 Kokkos::parallel_for Kokkos::View::destruction [MakePack::cv] [device=0]
+  0.1          269          269        1728           0        156 Kokkos::parallel_for Kokkos::View::initialization [send buf 22] [device=0]
+  0.1          269          269        1728           0        156 Kokkos::parallel_for Kokkos::View::initialization [send buf 14] [device=0]
+  0.1          268          268        1728           0        155 Kokkos::parallel_for Kokkos::View::initialization [recv buf 22] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 2] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 23] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 1] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 3] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 19] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 2] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 11] [device=0]
+  0.1          266          266        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 19] [device=0]
+  0.1          265          265        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 1] [device=0]
+  0.1          265          265     33647.5           0          8 MPI_Iprobe() 
+  0.1          265          265        1728           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 3] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 4] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 12] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 11] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 10] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 12] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 18] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 13] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 20] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 20] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 13] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 4] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 9] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 9] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 8] [device=0]
+  0.1          265          265        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 10] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 6] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 23] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 14] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 0] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 21] [device=0]
+  0.1          264          264        1728           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 18] [device=0]
+  0.1          263          263        1684           0        156 Kokkos::parallel_for Kokkos::View::initialization [advected] [device=0]
+  0.1          263          263        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 0] [device=0]
+  0.1          263          263        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 8] [device=0]
+  0.1          263          263        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 5] [device=0]
+  0.1          262          262        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 17] [device=0]
+  0.1          262          262        1728           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 15] [device=0]
+  0.1          261          261        1728           0        151 Kokkos::parallel_for Kokkos::View::initialization [recv buf 7] [device=0]
+  0.1          260          260        1728           0        151 Kokkos::parallel_for Kokkos::View::initialization [recv buf 5] [device=0]
+  0.1          260          260        1728           0        151 Kokkos::parallel_for Kokkos::View::initialization [send buf 17] [device=0]
+  0.1          260          260        1728           0        150 Kokkos::parallel_for Kokkos::View::initialization [recv buf 15] [device=0]
+  0.1          260          260        1728           0        150 Kokkos::parallel_for Kokkos::View::initialization [recv buf 16] [device=0]
+  0.1          259          259        1728           0        150 Kokkos::parallel_for Kokkos::View::initialization [send buf 16] [device=0]
+  0.1          259          259        1728           0        150 Kokkos::parallel_for Kokkos::View::initialization [send buf 6] [device=0]
+  0.1          258          258        1728           0        150 Kokkos::parallel_for Kokkos::View::initialization [send buf 7] [device=0]
+  0.1          217          255       10352       18576         25 Task_StartReceiving
+  0.1          216          247       10352       18576         24 Task_ClearBoundary
+  0.1          246          246       37152           0          7 MPI_Start() 
+  0.1          214          214     33647.5           0          6 MPI_Test() 
+  0.1          199          199        1440           0        138 Kokkos::parallel_for SendFluxCorrection3D_x3 [device=33554432]
+  0.1          198          198        1440           0        137 Kokkos::parallel_for ReceiveFluxCorrection_x2 [device=33554432]
+  0.1          192          192        1440           0        134 Kokkos::parallel_for SendFluxCorrection3D_x2 [device=33554432]
+  0.1          192          192       20704           0          9 Task_ApplyBoundaryConditionsOnCoarseOrFine
+  0.1          180          184           1           3     183621 MPI_Finalize() 
+  0.1          149          149           1           2     148619 MPI_Init_thread() 
+  0.1          140          140        1640           0         85 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::cv] [device=0]
+  0.1          139          139        1640           0         85 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::vector_component] [device=0]
+  0.1          138          138        1640           0         84 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::f3] [device=0]
+  0.1          138          138        1640           0         84 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::f2] [device=0]
+  0.1          136          136        1640           0         83 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::f1] [device=0]
+  0.1          136          136         864           0        157 Kokkos::parallel_for Kokkos::View::initialization [recv buf 36] [device=0]
+  0.1          135          135         864           0        157 Kokkos::parallel_for Kokkos::View::initialization [recv buf 27] [device=0]
+  0.1          135          135         864           0        156 Kokkos::parallel_for Kokkos::View::initialization [recv buf 31] [device=0]
+  0.1          135          135         864           0        156 Kokkos::parallel_for Kokkos::View::initialization [recv buf 35] [device=0]
+  0.1          135          135         864           0        156 Kokkos::parallel_for Kokkos::View::initialization [one_minus_sqrt_one_minus_advected_sq_37] [device=0]
+  0.1          134          134         864           0        156 Kokkos::parallel_for Kokkos::View::initialization [one_minus_sqrt_one_minus_advected_sq_12] [device=0]
+  0.1          134          134         864           0        156 Kokkos::parallel_for Kokkos::View::initialization [one_minus_advected_sq] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [advected.fluxX3] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [recv buf 49] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [advected.fluxX2] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:183] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:184] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [send buf 50] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [advected.fluxX1] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [send buf 49] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [one_minus_advected] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [recv buf 50] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:179] [device=0]
+  0.1          134          134         864           0        155 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:182] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:181] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/reconstruct/reconstruction.cpp:178] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 25] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 48] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 39] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/bvals/bvals_base.cpp:116] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 30] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 37] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 48] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [ParArrayNDGeneric:/usr/workspace/ellinger/repos/parthenon/src/bvals/bvals_base.cpp:117] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 40] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 40] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 39] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 44] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 38] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 43] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 29] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 41] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 41] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 38] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [advected.coarse] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [recv buf 44] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 43] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 54] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 29] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 51] [device=0]
+  0.1          133          133         864           0        154 Kokkos::parallel_for Kokkos::View::initialization [send buf 45] [device=0]
+  0.1          133          133         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 37] [device=0]
+  0.1          133          133         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 28] [device=0]
+  0.1          133          133         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 30] [device=0]
+  0.1          133          133         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 42] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 28] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 53] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 42] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 36] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 34] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 45] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 35] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 53] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 34] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 52] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 33] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 31] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 33] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [recv buf 47] [device=0]
+  0.1          132          132         864           0        153 Kokkos::parallel_for Kokkos::View::initialization [send buf 25] [device=0]
+  0.1          132          132         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 27] [device=0]
+  0.1          132          132         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 51] [device=0]
+  0.1          132          132         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 54] [device=0]
+  0.1          132          132         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 55] [device=0]
+  0.1          132          132         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 26] [device=0]
+  0.1          131          131         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 52] [device=0]
+  0.1          131          131         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 32] [device=0]
+  0.1          131          131         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 46] [device=0]
+  0.1          131          131         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 24] [device=0]
+  0.1          131          131         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 26] [device=0]
+  0.1          131          131         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [recv buf 46] [device=0]
+  0.1          131          131         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 24] [device=0]
+  0.1          131          131         864           0        152 Kokkos::parallel_for Kokkos::View::initialization [send buf 55] [device=0]
+  0.1          131          131         864           0        151 Kokkos::parallel_for Kokkos::View::initialization [send buf 32] [device=0]
+  0.1          131          131         864           0        151 Kokkos::parallel_for Kokkos::View::initialization [send buf 47] [device=0]
+  0.1          116          116        1640           0         71 Kokkos::parallel_for Kokkos::View::initialization [MakeFluxPack::sparse_assoc] [device=0]
+  0.0          104          104         800           0        130 Kokkos::parallel_for SendFluxCorrection3D_x1 [device=33554432]
+  0.0         53.2         53.2        1332           0         40 SearchAndSetNeighbors
+  0.0         50.9         50.9        1640           0         31 Kokkos::parallel_for Kokkos::View::destruction [MakeFluxPack::f1] [device=0]
+  0.0         50.0         50.0        1640           0         31 Kokkos::parallel_for Kokkos::View::destruction [MakeFluxPack::f2] [device=0]
+  0.0         48.4         48.4        1640           0         30 Kokkos::parallel_for Kokkos::View::destruction [MakeFluxPack::f3] [device=0]
+  0.0         47.1         47.1        1640           0         29 Kokkos::parallel_for Kokkos::View::destruction [MakeFluxPack::cv] [device=0]
+  0.0         36.8         36.8         352           0        105 Kokkos::parallel_for FillSameRankCoarseToFineAMR [device=33554432]
+  0.0         22.9         22.9       16224           0          1 MPI_Request_free() 
+  0.0         22.3         22.3          20           0       1117 Kokkos::parallel_for WeightedSumData [device=33554432]
+  0.0         15.0         15.0          10           0       1496 Kokkos::parallel_for FluxDivergenceMesh [device=33554432]
+  0.0         12.5         12.5        8112           0          2 MPI_Send_init() 
+  0.0         7.21         7.21        8112           0          1 MPI_Recv_init() 
+  0.0         4.23         4.23           1           0       4234 MPI_File_open()
+  0.0         3.67         3.67           2           0       1837 pthread_join
+  0.0        0.995        0.995           2           0        497 MPI_Bcast() 
+  0.0        0.994        0.994           3           0        331 Kokkos::parallel_for Kokkos::View::destruction [MeshData::PackVariables::packs_mirror] [device=0]
+  0.0        0.940        0.942         0.5         0.5       1883 MPI_File_read()
+  0.0        0.468        0.468           1           0        468 MPI_File_close()
+  0.0        0.458        0.458           3           0        152 Kokkos::parallel_for Kokkos::View::initialization [MeshData::PackVariables::coords] [device=0]
+  0.0        0.401        0.401          21           0         19 MPI_Allreduce() 
+  0.0        0.384        0.384           3           0        128 Kokkos::parallel_for Kokkos::View::destruction [MeshData::PackVariables::coords] [device=0]
+  0.0        0.382        0.382           3           0        127 Kokkos::parallel_for Kokkos::View::initialization [MeshData::PackVariables::packs] [device=0]
+  0.0        0.311        0.311           3           0        104 Kokkos::parallel_for Kokkos::View::destruction [MeshData::PackVariables::packs] [device=0]
+  0.0        0.148        0.148           3           0         50 MPI_Allgatherv() 
+  0.0        0.127        0.127          12           0         11 MakeOutputs
+  0.0        0.122        0.122           4           0         30 pthread_create
+  0.0        0.064        0.064           3           0         21 Kokkos::parallel_for Kokkos::View::initialization [MeshData::PackVariables::packs_mirror] [device=0]
+  0.0        0.060        0.060           3           0         20 Kokkos::parallel_for Kokkos::View::initialization [MeshData::PackVariables::coords_mirror] [device=0]
+  0.0        0.051        0.051           1           0         50 Step1: Construct new list
+  0.0        0.043        0.043           3           0         14 Kokkos::parallel_for Kokkos::View::destruction [MeshData::PackVariables::coords_mirror] [device=0]
+  0.0        0.041        0.041           2           0         20 CalculateLoadBalance
+  0.0        0.014        0.014           1           0         14 Step 3: Count blocks
+  0.0        0.014        0.014           1           0         14 Step 8: Recv data and unpack
+  0.0        0.011        0.011           1           0         11 MPI_File_seek()
+  0.0        0.011        0.011           1           0         11 Step 4: Calc buffer sizes
+  0.0        0.011        0.011           1           0         10 Step 5: Alloc buffer and start recv
+  0.0        0.011        0.011           1           0         10 Step 6: Alloc, pack, and send buffers
+  0.0        0.009        0.009           1           0         10 MPI_Type_free_keyval()
+  0.0        0.002        0.002         0.5           0          4 MPI_Status_set_elements()
+  0.0        0.001        0.001           1           0          1 MPI_Comm_rank() 
+  0.0        0.001        0.001           1           0          1 MPI_Comm_size() 
+  0.0        0.001        0.001         0.5           0          2 MPI_Get_count() 

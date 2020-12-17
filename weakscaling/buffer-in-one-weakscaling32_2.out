@@ -1,0 +1,90 @@
+Currently Loaded Modules:
+  1) cuda/10.1.243       3) tau/2.29.1   5) spectrum-mpi/rolling-release
+  2) StdEnv        (S)   4) gcc/7.3.1
+  Where:
+   S:  Module is Sticky, requires --force to unload or purge
+ 
+/p/gpfs1/ellinger/runs_buffer-in-one2/run_32
+NX1= 1024 NX2= 1024 NX3= 512
+Setup complete, executing driver...
+cycle=0 time=0.0000000000000000e+00 dt=1.4648437499999999e-04 zone-cycles/wsec = 0.00e+00
+cycle=1 time=1.4648437499999999e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 2.89e+08
+cycle=2 time=2.9296874999999999e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 2.19e+17
+cycle=3 time=4.3945312499999996e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 6.91e+06
+cycle=4 time=5.8593749999999998e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 6.26e+06
+cycle=5 time=7.3242187500000000e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 4.87e+08
+cycle=6 time=8.7890625000000002e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 9.53e+06
+cycle=7 time=1.0253906250000000e-03 dt=1.4648437499999999e-04 zone-cycles/wsec = 7.05e+06
+cycle=8 time=1.1718750000000000e-03 dt=1.4648437499999999e-04 zone-cycles/wsec = 6.49e+06
+cycle=9 time=1.3183593749999999e-03 dt=1.4648437499999999e-04 zone-cycles/wsec = 5.76e+08
+cycle=10 time=1.4648437499999998e-03 dt=1.4648437499999999e-04 zone-cycles/wsec = 6.46e+06
+Driver completed.
+time=1.46e-03 cycle=10
+tlim=1.00e+00 nlim=10
+Number of MeshBlocks = 18071; 1687  created, 0 destroyed during this simulation.
+walltime used = 5.10e+02
+zone-cycles/wallsecond = 9.26e+06
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@rzansel62>
+Subject: Job 615875: <weak scaling 32> in cluster <rzansel> Done
+Job <weak scaling 32> was submitted from host <rzansel61> by user <ellinger> in cluster <rzansel> at Fri Dec 11 11:04:33 2020
+Job was executed on host(s) <1*rzansel62>, in queue <pdebug>, as user <ellinger> in cluster <rzansel> at Fri Dec 11 11:04:34 2020
+                            <40*rzansel29>
+                            <40*rzansel8>
+                            <40*rzansel51>
+                            <40*rzansel54>
+                            <40*rzansel30>
+                            <40*rzansel32>
+                            <40*rzansel33>
+                            <40*rzansel34>
+</g/g12/ellinger> was used as the home directory.
+</usr/workspace/ellinger/repos/parthenon/runs> was used as the working directory.
+Started at Fri Dec 11 11:04:34 2020
+Terminated at Fri Dec 11 11:16:45 2020
+Results reported at Fri Dec 11 11:16:45 2020
+Your job looked like:
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash -f
+#BSUB -J "weak scaling 32"
+#BSUB -nnodes 8
+module load gcc/7.3.1
+module list
+## Set up tau
+##export SPACK_ROOT=$MYWS/repos/spack
+##source $SPACK_ROOT/share/spack/setup-env.sh
+##spack load -r tau+mpi
+##export TAU_TRACK_MESSAGE=1
+##export TAU_COMM_MATRIX=1
+##export TAU_PROFILE=1
+##export TAU_TRACE=1
+#export KOKKOS_NUM_DEVICES=4
+export OMP_NUM_THREADS=1
+## Set up runs
+NX1=1024
+NX2=1024
+NX3=512
+    
+P=32
+rundir="/p/gpfs1/ellinger/runs_buffer-in-one2/run_${P}"
+export PROFILEDIR=$rundir
+export TRACEDIR=$rundir
+echo ${rundir}
+mkdir -p $rundir && cd $rundir
+echo "NX1= ${NX1} NX2= ${NX2} NX3= ${NX3}"
+lrun -n ${P} -g 1 -c 1 -M "-gpu" $MYWS/repos/parthenon/build-buffer-in-one/example/advection/advection-example -i $MYWS/repos/parthenon/runs/parthinput.advection parthenon/time/nlim=10 parthenon/mesh/nx1=${NX1} parthenon/mesh/nx2=${NX2} parthenon/mesh/nx3=${NX3} 2>&1 run_${P}.out
+    
+------------------------------------------------------------
+Successfully completed.
+Resource usage summary:
+    CPU time :                                   2.00 sec.
+    Max Memory :                                 59 MB
+    Average Memory :                             58.53 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   1424 MB
+    Max Processes :                              4
+    Max Threads :                                27
+    Run time :                                   731 sec.
+    Turnaround time :                            732 sec.
+The output (if any) is above this job summary.

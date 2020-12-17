@@ -1,0 +1,182 @@
+Currently Loaded Modules:
+  1) cuda/10.1.243       3) tau/2.29.1   5) spectrum-mpi/rolling-release
+  2) StdEnv        (S)   4) gcc/7.3.1
+  Where:
+   S:  Module is Sticky, requires --force to unload or purge
+ 
+/p/gpfs1/ellinger/runs_buffer-in-one2/run_1
+NX1= 256 NX2= 256 NX3= 256
+Setup complete, executing driver...
+cycle=0 time=0.0000000000000000e+00 dt=5.8593749999999998e-04 zone-cycles/wsec = 0.00e+00
+cycle=1 time=5.8593749999999998e-04 dt=5.8593749999999998e-04 zone-cycles/wsec = 1.01e+07
+cycle=2 time=1.1718750000000000e-03 dt=5.8593749999999998e-04 zone-cycles/wsec = 1.39e+19
+cycle=3 time=1.7578124999999998e-03 dt=5.8593749999999998e-04 zone-cycles/wsec = 2.24e+07
+cycle=4 time=2.3437499999999999e-03 dt=5.8593749999999998e-04 zone-cycles/wsec = 2.23e+07
+cycle=5 time=2.9296875000000000e-03 dt=5.8593749999999998e-04 zone-cycles/wsec = 2.22e+07
+cycle=6 time=3.5156250000000001e-03 dt=5.8593749999999998e-04 zone-cycles/wsec = 2.23e+07
+cycle=7 time=4.1015625000000002e-03 dt=5.8593749999999998e-04 zone-cycles/wsec = 2.23e+07
+cycle=8 time=4.6874999999999998e-03 dt=5.8593749999999998e-04 zone-cycles/wsec = 2.23e+07
+cycle=9 time=5.2734374999999995e-03 dt=5.8593749999999998e-04 zone-cycles/wsec = 2.23e+07
+cycle=10 time=5.8593749999999991e-03 dt=5.8593749999999998e-04 zone-cycles/wsec = 2.24e+07
+Driver completed.
+time=5.86e-03 cycle=10
+tlim=1.00e+00 nlim=10
+Number of MeshBlocks = 904; 392  created, 0 destroyed during this simulation.
+walltime used = 1.06e+01
+zone-cycles/wallsecond = 2.23e+07
+/p/gpfs1/ellinger/runs_buffer-in-one2/run_2
+NX1= 512 NX2= 256 NX3= 256
+Setup complete, executing driver...
+cycle=0 time=0.0000000000000000e+00 dt=2.9296874999999999e-04 zone-cycles/wsec = 0.00e+00
+cycle=1 time=2.9296874999999999e-04 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.91e+07
+cycle=2 time=5.8593749999999998e-04 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.46e+19
+cycle=3 time=8.7890624999999991e-04 dt=2.9296874999999999e-04 zone-cycles/wsec = 4.26e+07
+cycle=4 time=1.1718750000000000e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 4.28e+07
+cycle=5 time=1.4648437500000000e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 4.28e+07
+cycle=6 time=1.7578125000000000e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 4.25e+07
+cycle=7 time=2.0507812500000001e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 4.26e+07
+cycle=8 time=2.3437499999999999e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 4.28e+07
+cycle=9 time=2.6367187499999997e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 4.27e+07
+cycle=10 time=2.9296874999999996e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 4.26e+07
+Driver completed.
+time=2.93e-03 cycle=10
+tlim=1.00e+00 nlim=10
+Number of MeshBlocks = 1640; 616  created, 0 destroyed during this simulation.
+walltime used = 1.01e+01
+zone-cycles/wallsecond = 4.27e+07
+/p/gpfs1/ellinger/runs_buffer-in-one2/run_4
+NX1= 512 NX2= 512 NX3= 256
+Setup complete, executing driver...
+cycle=0 time=0.0000000000000000e+00 dt=2.9296874999999999e-04 zone-cycles/wsec = 0.00e+00
+cycle=1 time=2.9296874999999999e-04 dt=2.9296874999999999e-04 zone-cycles/wsec = 3.63e+07
+cycle=2 time=5.8593749999999998e-04 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.57e+19
+cycle=3 time=8.7890624999999991e-04 dt=2.9296874999999999e-04 zone-cycles/wsec = 8.19e+07
+cycle=4 time=1.1718750000000000e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 8.21e+07
+cycle=5 time=1.4648437500000000e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 8.25e+07
+cycle=6 time=1.7578125000000000e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 8.24e+07
+cycle=7 time=2.0507812500000001e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 8.24e+07
+cycle=8 time=2.3437499999999999e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 8.24e+07
+cycle=9 time=2.6367187499999997e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 8.24e+07
+cycle=10 time=2.9296874999999996e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 8.24e+07
+Driver completed.
+time=2.93e-03 cycle=10
+tlim=1.00e+00 nlim=10
+Number of MeshBlocks = 2944; 896  created, 0 destroyed during this simulation.
+walltime used = 9.38e+00
+zone-cycles/wallsecond = 8.23e+07
+/p/gpfs1/ellinger/runs_buffer-in-one2/run_8
+NX1= 512 NX2= 512 NX3= 512
+Setup complete, executing driver...
+cycle=0 time=0.0000000000000000e+00 dt=2.9296874999999999e-04 zone-cycles/wsec = 0.00e+00
+cycle=1 time=2.9296874999999999e-04 dt=2.9296874999999999e-04 zone-cycles/wsec = 3.07e+06
+cycle=2 time=5.8593749999999998e-04 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.33e+19
+cycle=3 time=8.7890624999999991e-04 dt=2.9296874999999999e-04 zone-cycles/wsec = 3.44e+06
+cycle=4 time=1.1718750000000000e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.26e+08
+cycle=5 time=1.4648437500000000e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.62e+08
+cycle=6 time=1.7578125000000000e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.23e+08
+cycle=7 time=2.0507812500000001e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.63e+08
+cycle=8 time=2.3437499999999999e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.64e+08
+cycle=9 time=2.6367187499999997e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.64e+08
+cycle=10 time=2.9296874999999996e-03 dt=2.9296874999999999e-04 zone-cycles/wsec = 1.59e+08
+Driver completed.
+time=2.93e-03 cycle=10
+tlim=1.00e+00 nlim=10
+Number of MeshBlocks = 5244; 1148  created, 0 destroyed during this simulation.
+walltime used = 5.78e+01
+zone-cycles/wallsecond = 2.38e+07
+/p/gpfs1/ellinger/runs_buffer-in-one2/run_16
+NX1= 1024 NX2= 512 NX3= 512
+Setup complete, executing driver...
+cycle=0 time=0.0000000000000000e+00 dt=1.4648437499999999e-04 zone-cycles/wsec = 0.00e+00
+cycle=1 time=1.4648437499999999e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 4.01e+06
+cycle=2 time=2.9296874999999999e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 2.28e+17
+cycle=3 time=4.3945312499999996e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 2.59e+08
+cycle=4 time=5.8593749999999998e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 4.05e+06
+cycle=5 time=7.3242187500000000e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 5.79e+06
+cycle=6 time=8.7890625000000002e-04 dt=1.4648437499999999e-04 zone-cycles/wsec = 2.56e+08
+cycle=7 time=1.0253906250000000e-03 dt=1.4648437499999999e-04 zone-cycles/wsec = 2.74e+08
+cycle=8 time=1.1718750000000000e-03 dt=1.4648437499999999e-04 zone-cycles/wsec = 4.02e+06
+cycle=9 time=1.3183593749999999e-03 dt=1.4648437499999999e-04 zone-cycles/wsec = 3.94e+06
+cycle=10 time=1.4648437499999998e-03 dt=1.4648437499999999e-04 zone-cycles/wsec = 3.10e+08
+Driver completed.
+time=1.46e-03 cycle=10
+tlim=1.00e+00 nlim=10
+Number of MeshBlocks = 9865; 1673  created, 0 destroyed during this simulation.
+walltime used = 3.01e+02
+zone-cycles/wallsecond = 8.54e+06
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@rzansel62>
+Subject: Job 615809: <weak scaling> in cluster <rzansel> Done
+Job <weak scaling> was submitted from host <rzansel61> by user <ellinger> in cluster <rzansel> at Fri Dec 11 09:03:48 2020
+Job was executed on host(s) <1*rzansel62>, in queue <pdebug>, as user <ellinger> in cluster <rzansel> at Fri Dec 11 09:03:50 2020
+                            <40*rzansel32>
+                            <40*rzansel33>
+                            <40*rzansel34>
+                            <40*rzansel35>
+</g/g12/ellinger> was used as the home directory.
+</usr/workspace/ellinger/repos/parthenon/runs> was used as the working directory.
+Started at Fri Dec 11 09:03:50 2020
+Terminated at Fri Dec 11 09:19:15 2020
+Results reported at Fri Dec 11 09:19:15 2020
+Your job looked like:
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/bash -f
+#BSUB -J "weak scaling"
+#BSUB -nnodes 4
+module load gcc/7.3.1
+module list
+## Set up tau
+##export SPACK_ROOT=$MYWS/repos/spack
+##source $SPACK_ROOT/share/spack/setup-env.sh
+##spack load -r tau+mpi
+##export TAU_TRACK_MESSAGE=1
+##export TAU_COMM_MATRIX=1
+##export TAU_PROFILE=1
+##export TAU_TRACE=1
+#export KOKKOS_NUM_DEVICES=4
+export OMP_NUM_THREADS=1
+## Set up runs
+NX1=256
+NX2=256
+NX3=256
+P=1
+rundir="/p/gpfs1/ellinger/runs_buffer-in-one2/run_${P}"
+export PROFILEDIR=$rundir
+export TRACEDIR=$rundir
+echo ${rundir}
+mkdir -p $rundir && cd $rundir
+echo "NX1= ${NX1} NX2= ${NX2} NX3= ${NX3}"
+lrun -n ${P} -g 1 -c 1 -M "-gpu" $MYWS/repos/parthenon/build-buffer-in-one/example/advection/advection-example -i $MYWS/repos/parthenon/runs/parthinput.advection parthenon/time/nlim=10 parthenon/mesh/nx1=${NX1} parthenon/mesh/nx2=${NX2} parthenon/mesh/nx3=${NX3} 2>&1 run_${P}.out
+P=2
+NX1=`expr $NX1 \\* 2 `
+rundir="/p/gpfs1/ellinger/runs_buffer-in-one2/run_${P}"
+export PROFILEDIR=$rundir
+export TRACEDIR=$rundir
+echo ${rundir}
+mkdir -p $rundir && cd $rundir
+echo "NX1= ${NX1} NX2= ${NX2} NX3= ${NX3}"
+lrun -n ${P} -g 1 -c 1 -M "-gpu" $MYWS/repos/parthenon/build-buffer-in-one/example/advection/advection-example -i $MYWS/repos/parthenon/runs/parthinput.advection parthenon/time/nlim=10 parthenon/mesh/nx1=${NX1} parthenon/mesh/nx2=${NX2} parthenon/mesh/nx3=${NX3} 2>&1 run_${P}.out
+ 
+P=4
+NX2=`expr $NX2 \\* 2 `
+rundir="/p/gpfs1/ellinger/runs_buffer-in-one2/run_${P}"
+export PROFILEDIR=$rundir
+export TRACEDIR=$rundir
+echo ${rundir}
+mkdir -p $rundir && cd $rundir
+(... more ...)
+------------------------------------------------------------
+Successfully completed.
+Resource usage summary:
+    CPU time :                                   0.35 sec.
+    Max Memory :                                 59 MB
+    Average Memory :                             58.63 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   1424 MB
+    Max Processes :                              4
+    Max Threads :                                27
+    Run time :                                   926 sec.
+    Turnaround time :                            927 sec.
+The output (if any) is above this job summary.
