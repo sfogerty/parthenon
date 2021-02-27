@@ -3,6 +3,8 @@
 ## Current develop
 
 ### Added (new features/APIs/variables/...)
+- [[PR 461]](https://github.com/lanl/parthenon/pull/461) A negative `dt` in an output blovck disables it.
+- [[PR 406]](https://github.com/lanl/parthenon/pull/406) Add `stochastic_subgrid` example that performs a random amount of work per cell (drawn from a power law distribution)
 - [[PR 440]](https://github.com/lanl/parthenon/pull/440) Add abstraction for allocating a `unique_ptr` to an object in device memory
 - [[PR 438]](https://github.com/lanl/parthenon/pull/438) More diagnostic runtime output (AMR/Loadbalance and mesh structure) controlled via `parthenon/time/ncycle_out_mesh` input parameter (default 0 - off)
 - [[PR 412]](https://github.com/lanl/parthenon/pull/412) Add capability to use host (pinned) memory for communication buffers (via `PARTHENON_ENABLE_HOST_COMM_BUFFERS` - default OFF)
@@ -26,6 +28,7 @@
 - [[PR 390]](https://github.com/lanl/parthenon/pull/390) Resolve @PAR_ROOT@ to parthenon root rather than the location of the current source directory
 - [[PR 443]](https://github.com/lanl/parthenon/pull/443) Fix Darwin machine config - use spectrum mpi
 - [[PR 444]](https://github.com/lanl/parthenon/pull/444) Writes performance metrics to file for advection test
+- [[PR 452]](https://github.com/lanl/parthenon/pull/452) Disable copyright check and linting by default, add CI check for copyright
 
 ### Removed (removing behavior/API/varaibles/...)
 
