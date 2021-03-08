@@ -204,9 +204,9 @@ if (ENABLE_COMPILER_WARNINGS)
   add_compile_options(-Wall)
 endif()
 
-# We want Kokkos to be built with C++14, since that's what we're using in
+# We want Kokkos to be built with C++17, since that's what we're using in
 # Parthenon.
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 if (NOT TARGET Kokkos::kokkos)
   if (PARTHENON_IMPORT_KOKKOS)
     find_package(Kokkos 3)
