@@ -207,6 +207,8 @@ endif()
 # We want Kokkos to be built with C++17, since that's what we're using in
 # Parthenon.
 set(CMAKE_CXX_STANDARD 17)
+# ensure correct flag is used as deprecated c++1z is not supported by nvcc
+set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++17")
 if (NOT TARGET Kokkos::kokkos)
   if (PARTHENON_IMPORT_KOKKOS)
     find_package(Kokkos 3)
