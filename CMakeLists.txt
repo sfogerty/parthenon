@@ -11,7 +11,7 @@
 # the public, perform publicly and display publicly, and to permit others to do so.
 #=========================================================================================
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 # Imports machine-specific configuration
 include(cmake/MachineCfg.cmake)
@@ -30,8 +30,6 @@ include(CTest)
 option(PARTHENON_SINGLE_PRECISION "Run in single precision" OFF)
 option(PARTHENON_DISABLE_MPI "MPI is enabled by default if found, set this to True to disable MPI" OFF)
 option(PARTHENON_ENABLE_HOST_COMM_BUFFERS "Allocate communication buffers on host" OFF)
-option(PARTHENON_ENABLE_INIT_PACKING "Use MeshBlockPack based buffer functions in \
-Mesh::Initialize. Does NOT support sparse variables." OFF)
 option(PARTHENON_DISABLE_OPENMP "OpenMP is enabled by default if found, set this to True to disable OpenMP" OFF)
 option(PARTHENON_DISABLE_HDF5 "HDF5 is enabled by default if found, set this to True to disable HDF5" OFF)
 option(PARTHENON_LINT_DEFAULT "Linting is turned off by default, use the \"lint\" target or set \
@@ -65,9 +63,9 @@ include(cmake/Format.cmake)
 include(cmake/Lint.cmake)
 
 # regression test reference data
-set(REGRESSION_GOLD_STANDARD_VER 5 CACHE STRING "Version of gold standard to download and use")
+set(REGRESSION_GOLD_STANDARD_VER 4 CACHE STRING "Version of gold standard to download and use")
 set(REGRESSION_GOLD_STANDARD_HASH
-  "SHA512=bf5c56e760d44d0266df2f5a5230a834c9477b11d692fa72407672423f4b98cd1a1b7e416fb55ec61e7244fbaa3e8d2c838ad1af899c8487917dacd76c198979"
+  "SHA512=8f9da3589ad549b5640065d37d1e26a15fdc348568a28c09b332ad2b0e612884282a9ce13acf3747505d3da9859b7d3990b95bc6d919ec8faa09f5c124afb006"
   CACHE STRING "Hash of default gold standard file to download")
 option(REGRESSION_GOLD_STANDARD_SYNC "Automatically sync gold standard files." ON)
 
@@ -127,13 +125,19 @@ endif()
 
 set(ENABLE_OPENMP OFF)
 if (NOT PARTHENON_DISABLE_OPENMP)
-  find_package(OpenMP COMPONENTS CXX)
-  if (NOT OpenMP_FOUND)
-    message(FATAL_ERROR "OpenMP is required but couldn't be found. "
-    "If you want to build Parthenon without OpenMP, please rerun CMake with -DPARTHENON_DISABLE_OPENMP=ON")
+  # Using Host OpenMP and Cuda currently does not compile with C++17 standard.
+  # We may need to revisit this logic when OpenMP target for devices will be used in the future.
+  if (Kokkos_ENABLE_CUDA)
+    message(STATUS "Parthenon is not using Host OpenMP because Cuda is enabled")
+  else()
+    find_package(OpenMP COMPONENTS CXX)
+    if (NOT OpenMP_FOUND)
+      message(FATAL_ERROR "OpenMP is required but couldn't be found. "
+      "If you want to build Parthenon without OpenMP, please rerun CMake with -DPARTHENON_DISABLE_OPENMP=ON")
+    endif()
+    set(ENABLE_OPENMP ON)
+    set(Kokkos_ENABLE_OPENMP ON CACHE BOOL "Allow Kokkos to use OpenMP")
   endif()
-  set(ENABLE_OPENMP ON)
-  set(Kokkos_ENABLE_OPENMP ON CACHE BOOL "Allow Kokkos to use OpenMP")
 endif()
 
 if (Kokkos_ENABLE_CUDA AND TEST_INTEL_OPTIMIZATION)
@@ -206,7 +210,7 @@ if (ENABLE_COMPILER_WARNINGS)
   add_compile_options(-Wall)
 endif()
 
-# We want Kokkos to be built with C++14, since that's what we're using in
+# We want Kokkos to be built with C++17, since that's what we're using in
 # Parthenon.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
