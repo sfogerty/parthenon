@@ -27,6 +27,11 @@
 
 namespace parthenon {
 
+// Declare static class variables
+Kokkos::Timer Driver::timer_main;
+Kokkos::Timer Driver::timer_cycle;
+
+
 void Driver::PreExecute() {
   if (Globals::my_rank == 0) {
     std::cout << std::endl << "Setup complete, executing driver...\n" << std::endl;

@@ -17,6 +17,7 @@
 
 // Only proceed if HDF5 output enabled
 
+#include "driver/driver.hpp"
 #include "outputs/parthenon_hdf5.hpp"
 
 #include "mesh/meshblock.hpp"
@@ -286,6 +287,8 @@ void PHDF5Output::WriteOutputFile(Mesh *pm, ParameterInput *pin, SimTime *tm) {
         writeH5AI32("NCycle", &(tm->ncycle), localDSpace, myDSet);
         writeH5AF64("Time", &(tm->time), localDSpace, myDSet);
       }
+      double walltime=Driver::elapsedWallTime();
+      writeH5AF64("WallTime", &(walltime), localDSpace, myDSet);
       writeH5AI32("NumDims", &pm->ndim, localDSpace, myDSet);
       writeH5AI32("NumMeshBlocks", &pm->nbtotal, localDSpace, myDSet);
       writeH5AI32("MaxLevel", &max_level, localDSpace, myDSet);

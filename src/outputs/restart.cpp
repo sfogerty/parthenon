@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 
+#include "driver/driver.hpp"
 #include "mesh/mesh.hpp"
 #include "mesh/meshblock.hpp"
 #include "outputs/outputs.hpp"
@@ -219,6 +220,8 @@ void RestartOutput::WriteOutputFile(Mesh *pm, ParameterInput *pin, SimTime *tm) 
         writeH5AF64("Time", &(tm->time), localDSpace, myDSet);
         writeH5AF64("dt", &(tm->dt), localDSpace, myDSet);
       }
+      double walltime=Driver::elapsedWallTime();
+      writeH5AF64("WallTime", &(walltime), localDSpace, myDSet);
       writeH5ASTRING("Coordinates", std::string(mb.coords.Name()), localDSpace, myDSet);
 
       writeH5AI32("NumDims", &pm->ndim, localDSpace, myDSet);

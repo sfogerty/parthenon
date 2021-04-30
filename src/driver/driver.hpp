@@ -46,9 +46,10 @@ class Driver {
   ApplicationInput *app_input;
   Mesh *pmesh;
   std::unique_ptr<Outputs> pouts;
-
+  static double elapsedWallTime() { return timer_main.seconds(); }
+  static double elapsedCycleTime() { return timer_cycle.seconds(); }
  protected:
-  Kokkos::Timer timer_cycle, timer_main;
+  static Kokkos::Timer timer_cycle, timer_main;
   std::uint64_t mbcnt_prev;
   virtual void PreExecute();
   virtual void PostExecute();
