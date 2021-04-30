@@ -31,7 +31,6 @@ namespace parthenon {
 Kokkos::Timer Driver::timer_main;
 Kokkos::Timer Driver::timer_cycle;
 
-
 void Driver::PreExecute() {
   if (Globals::my_rank == 0) {
     std::cout << std::endl << "Setup complete, executing driver...\n" << std::endl;
@@ -177,13 +176,15 @@ void EvolutionDriver::OutputCycleDiagnostics() {
   if (tm.ncycle_out != 0) {
     if (tm.ncycle % tm.ncycle_out == 0) {
       if (Globals::my_rank == 0) {
+        auto wtime = timer_main.seconds();
         std::uint64_t zonecycles =
             (pmesh->mbcnt - mbcnt_prev) *
             static_cast<std::uint64_t>(pmesh->GetNumberOfMeshBlockCells());
         std::cout << "cycle=" << tm.ncycle << std::scientific
                   << std::setprecision(dt_precision) << " time=" << tm.time
                   << " dt=" << tm.dt << std::setprecision(2) << " zone-cycles/wsec = "
-                  << static_cast<double>(zonecycles) / timer_cycle.seconds();
+                  << static_cast<double>(zonecycles) / timer_cycle.seconds()
+                  << " wsec = " << wtime;
         // insert more diagnostics here
         std::cout << std::endl;
 
