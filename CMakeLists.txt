@@ -32,6 +32,7 @@ option(PARTHENON_DISABLE_MPI "MPI is enabled by default if found, set this to Tr
 option(PARTHENON_ENABLE_HOST_COMM_BUFFERS "Allocate communication buffers on host" OFF)
 option(PARTHENON_DISABLE_OPENMP "OpenMP is enabled by default if found, set this to True to disable OpenMP" OFF)
 option(PARTHENON_DISABLE_HDF5 "HDF5 is enabled by default if found, set this to True to disable HDF5" OFF)
+option(PARTHENON_DISABLE_HDF5_COMPRESSION "HDF5 compression is enabled by default, set this to True to disable compression in HDF5 output/restart files" OFF)
 option(PARTHENON_LINT_DEFAULT "Linting is turned off by default, use the \"lint\" target or set \
 this to True to enable linting in the default target" OFF)
 option(PARTHENON_COPYRIGHT_CHECK_DEFAULT "Copyright check is turned off by default, use the \
@@ -63,9 +64,9 @@ include(cmake/Format.cmake)
 include(cmake/Lint.cmake)
 
 # regression test reference data
-set(REGRESSION_GOLD_STANDARD_VER 4 CACHE STRING "Version of gold standard to download and use")
+set(REGRESSION_GOLD_STANDARD_VER 8 CACHE STRING "Version of gold standard to download and use")
 set(REGRESSION_GOLD_STANDARD_HASH
-  "SHA512=8f9da3589ad549b5640065d37d1e26a15fdc348568a28c09b332ad2b0e612884282a9ce13acf3747505d3da9859b7d3990b95bc6d919ec8faa09f5c124afb006"
+  "SHA512=a1e6e5bbb5ee190dec6a147e2b9c7711a09c651dd01edc3af401ce63fb8550e746982cb8f376bd12a7f4ae7c4ecd9d1e789e918750bf67f61abf6659fd04c8fe"
   CACHE STRING "Hash of default gold standard file to download")
 option(REGRESSION_GOLD_STANDARD_SYNC "Automatically sync gold standard files." ON)
 
@@ -162,6 +163,23 @@ if (NOT PARTHENON_DISABLE_HDF5)
     "was found. Please install a parallel version of HDF5 (or point CMake to it by adding its path "
     "to the CMAKE_PREFIX_PATH environment variable), or disable either MPI or HDF5 by rerunning "
     "CMake with -DPARTHENON_DISABLE_MPI=ON or -DPARTHENON_DISABLE_HDF5=ON")
+  endif()
+
+  if ((NOT PARTHENON_DISABLE_HDF5_COMPRESSION) AND ENABLE_MPI)
+    # make sure we use an HDF5 version that doesn't have a known bug when used with compression and
+    # parallel I/O. See:
+    # https://forum.hdfgroup.org/t/crash-when-writing-parallel-compressed-chunks/6186
+    #
+    # It appears that the bug is fixed in 1.10.7 and 1.12.0, assume that later versions are ok as
+    # well, so we check that we have at least 1.10.7
+    if (HDF5_VERSION VERSION_LESS "1.10.7")
+      message(FATAL_ERROR "This version of HDF5 has a known bug that will crash when trying to "
+      "write compressed datasets with MPI parallel I/O. Please use HDF5 version 1.10.7 or later "
+      "or turn off either HDF5 compression or MPI by rerunning CMake with "
+      "-DPARTHENON_DISABLE_HDF5_COMPRESSION=ON or -DPARTHENON_DISABLE_MPI=ON.\nNOTE: Using HDF5 "
+      "without compression can result in much larger HDF5 output and restart files as well as "
+      "degraded I/O performance.")
+    endif()
   endif()
 
   # HDF5 Interface library
