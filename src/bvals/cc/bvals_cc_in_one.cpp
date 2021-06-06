@@ -447,8 +447,11 @@ TaskStatus SendBoundaryBuffers(std::shared_ptr<MeshData<Real>> &md) {
     Kokkos::Profiling::popRegion(); // Reset boundaries
   }
 
+// TODO(pgrete) double check if there's no single Kokkos version that's the fastest
+//   option on both host and devices
+#ifdef KOKKOS_ENABLE_CUDA
   Kokkos::parallel_for(
-      "SendBoundaryBuffers",
+      "SendBoundaryBuffers (CUDA)",
       Kokkos::TeamPolicy<>(parthenon::DevExecSpace(), buffers_used, Kokkos::AUTO),
       KOKKOS_LAMBDA(parthenon::team_mbr_t team_member) {
         const int b = team_member.league_rank();
@@ -462,24 +465,54 @@ TaskStatus SendBoundaryBuffers(std::shared_ptr<MeshData<Real>> &md) {
         const int Nj = ej + 1 - sj;
         const int Nk = ek + 1 - sk;
         const int &Nv = boundary_info(b).Nv;
-        const int NvNkNj = Nv * Nk * Nj;
-        const int NkNj = Nk * Nj;
+        const int NvNkNjNi = Nv * Nk * Nj * Ni;
+        const int NkNjNi = Nk * Nj * Ni;
+        const int NjNi = Nj * Ni;
         Kokkos::parallel_for(
-            Kokkos::TeamThreadRange<>(team_member, NvNkNj), [&](const int idx) {
-              const int v = idx / NkNj;
-              int k = (idx - v * NkNj) / Nj;
-              int j = idx - v * NkNj - k * Nj;
+            Kokkos::TeamThreadRange<>(team_member, NvNkNjNi), [&](const int idx) {
+              const int v = idx / NkNjNi;
+              int k = (idx - v * NkNjNi) / NjNi;
+              int j = (idx - v * NkNjNi - k * NjNi) / Ni;
+              int i = (idx - v * NkNjNi - k * NjNi - j * Ni) + si;
               k += sk;
               j += sj;
 
-              Kokkos::parallel_for(
-                  Kokkos::ThreadVectorRange(team_member, si, ei + 1), [&](const int i) {
-                    boundary_info(b).buf(i - si +
-                                         Ni * (j - sj + Nj * (k - sk + Nk * v))) =
-                        boundary_info(b).var(v, k, j, i);
-                  });
+              boundary_info(b).buf(idx) = boundary_info(b).var(v, k, j, i);
             });
       });
+#else
+  Kokkos::parallel_for(
+      "SendBoundaryBuffers (Host)",
+      Kokkos::TeamPolicy<>(parthenon::DevExecSpace(), buffers_used, Kokkos::AUTO),
+      KOKKOS_LAMBDA(parthenon::team_mbr_t team_member) {
+        const int b = team_member.league_rank();
+        const int &si = boundary_info(b).si;
+        const int &ei = boundary_info(b).ei;
+        const int &sj = boundary_info(b).sj;
+        const int &ej = boundary_info(b).ej;
+        const int &sk = boundary_info(b).sk;
+        const int &ek = boundary_info(b).ek;
+        const int Ni = ei + 1 - si;
+        const int Nj = ej + 1 - sj;
+        const int Nk = ek + 1 - sk;
+        const int &Nv = boundary_info(b).Nv;
+        const int NkNjNi = Nk * Nj * Ni;
+        const int NjNi = Nj * Ni;
+        Kokkos::parallel_for(
+            Kokkos::TeamThreadRange<>(team_member, Nv), [&](const int v) {
+              Kokkos::parallel_for(Kokkos::ThreadVectorRange(team_member, NkNjNi),
+                                   [&](const int idx) {
+                                     int k = idx / NjNi;
+                                     int j = (idx - k * NjNi) / Ni;
+                                     int i = (idx - k * NjNi - j * Ni) + si;
+                                     k += sk;
+                                     j += sj;
+                                     boundary_info(b).buf(idx + v * NkNjNi) =
+                                         boundary_info(b).var(v, k, j, i);
+                                   });
+            });
+      });
+#endif
 
 #ifdef MPI_PARALLEL
   // Ensure buffer filling kernel finished before MPI_Start is called in the following
@@ -619,14 +652,15 @@ TaskStatus SetBoundaries(std::shared_ptr<MeshData<Real>> &md) {
     boundary_info = md->GetSetBuffers();
   }
 
+// TODO(pgrete) double check if there's no single Kokkos version that's the fastest
+//   option on both host and devices
+#ifdef KOKKOS_ENABLE_CUDA
   Kokkos::parallel_for(
-      "SetBoundaries",
+      "SetBoundaries (Cuda)",
       Kokkos::TeamPolicy<>(parthenon::DevExecSpace(), boundary_info.extent(0),
                            Kokkos::AUTO),
       KOKKOS_LAMBDA(parthenon::team_mbr_t team_member) {
         const int b = team_member.league_rank();
-        // TODO(pgrete) profile perf implication of using reference.
-        // Test in two jobs indicted a 10% difference, but were also run on diff. nodes
         const int &si = boundary_info(b).si;
         const int &ei = boundary_info(b).ei;
         const int &sj = boundary_info(b).sj;
@@ -639,23 +673,57 @@ TaskStatus SetBoundaries(std::shared_ptr<MeshData<Real>> &md) {
         const int Nk = ek + 1 - sk;
         const int &Nv = boundary_info(b).Nv;
 
-        const int NvNkNj = Nv * Nk * Nj;
-        const int NkNj = Nk * Nj;
+        const int NvNkNjNi = Nv * Nk * Nj * Ni;
+        const int NkNjNi = Nk * Nj * Ni;
+        const int NjNi = Nj * Ni;
         Kokkos::parallel_for(
-            Kokkos::TeamThreadRange<>(team_member, NvNkNj), [&](const int idx) {
-              const int v = idx / NkNj;
-              int k = (idx - v * NkNj) / Nj;
-              int j = idx - v * NkNj - k * Nj;
+            Kokkos::TeamThreadRange<>(team_member, NvNkNjNi), [&](const int idx) {
+              const int v = idx / NkNjNi;
+              int k = (idx - v * NkNjNi) / NjNi;
+              int j = (idx - v * NkNjNi - k * NjNi) / Ni;
+              int i = (idx - v * NkNjNi - k * NjNi - j * Ni) + si;
               k += sk;
               j += sj;
 
-              Kokkos::parallel_for(
-                  Kokkos::ThreadVectorRange(team_member, si, ei + 1), [&](const int i) {
-                    boundary_info(b).var(v, k, j, i) = boundary_info(b).buf(
-                        i - si + Ni * (j - sj + Nj * (k - sk + Nk * v)));
-                  });
+              boundary_info(b).var(v, k, j, i) = boundary_info(b).buf(idx);
             });
       });
+#else
+  Kokkos::parallel_for(
+      "SetBoundaries (Host)",
+      Kokkos::TeamPolicy<>(parthenon::DevExecSpace(), boundary_info.extent(0),
+                           Kokkos::AUTO),
+      KOKKOS_LAMBDA(parthenon::team_mbr_t team_member) {
+        const int b = team_member.league_rank();
+        const int &si = boundary_info(b).si;
+        const int &ei = boundary_info(b).ei;
+        const int &sj = boundary_info(b).sj;
+        const int &ej = boundary_info(b).ej;
+        const int &sk = boundary_info(b).sk;
+        const int &ek = boundary_info(b).ek;
+
+        const int Ni = ei + 1 - si;
+        const int Nj = ej + 1 - sj;
+        const int Nk = ek + 1 - sk;
+        const int &Nv = boundary_info(b).Nv;
+
+        const int NkNjNi = Nk * Nj * Ni;
+        const int NjNi = Nj * Ni;
+        Kokkos::parallel_for(
+            Kokkos::TeamThreadRange<>(team_member, Nv), [&](const int v) {
+              Kokkos::parallel_for(Kokkos::ThreadVectorRange(team_member, NkNjNi),
+                                   [&](const int idx) {
+                                     int k = idx / NjNi;
+                                     int j = (idx - k * NjNi) / Ni;
+                                     int i = (idx - k * NjNi - j * Ni) + si;
+                                     k += sk;
+                                     j += sj;
+                                     boundary_info(b).var(v, k, j, i) =
+                                         boundary_info(b).buf(idx + v * NkNjNi);
+                                   });
+            });
+      });
+#endif
 
   Kokkos::Profiling::popRegion(); // Task_SetBoundaries_MeshData
   // TODO(?) reintroduce sparse logic (or merge with above)
