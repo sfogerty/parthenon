@@ -67,19 +67,18 @@ std::shared_ptr<MeshBlock> MeshBlock::Make(int igid, int ilid, LogicalLocation i
                                            RegionSize input_block,
                                            BoundaryFlag *input_bcs, Mesh *pm,
                                            ParameterInput *pin, ApplicationInput *app_in,
-                                           Properties_t &properties, Packages_t &packages,
-                                           int igflag, double icost) {
+                                           Packages_t &packages, int igflag,
+                                           double icost) {
   auto pmb = std::make_shared<MeshBlock>();
-  pmb->Initialize(igid, ilid, iloc, input_block, input_bcs, pm, pin, app_in, properties,
-                  packages, igflag, icost);
+  pmb->Initialize(igid, ilid, iloc, input_block, input_bcs, pm, pin, app_in, packages,
+                  igflag, icost);
   return pmb;
 }
 
 void MeshBlock::Initialize(int igid, int ilid, LogicalLocation iloc,
                            RegionSize input_block, BoundaryFlag *input_bcs, Mesh *pm,
                            ParameterInput *pin, ApplicationInput *app_in,
-                           Properties_t &properties, Packages_t &packages, int igflag,
-                           double icost) {
+                           Packages_t &packages, int igflag, double icost) {
   exec_space = DevExecSpace();
   pmy_mesh = pm;
   loc = iloc;
@@ -87,7 +86,6 @@ void MeshBlock::Initialize(int igid, int ilid, LogicalLocation iloc,
   gid = igid;
   lid = ilid;
   gflag = igflag;
-  this->properties = properties;
   this->packages = packages;
   cost_ = icost;
 
@@ -136,21 +134,9 @@ void MeshBlock::Initialize(int igid, int ilid, LogicalLocation iloc,
   // Boundary
   pbval = std::make_unique<BoundaryValues>(shared_from_this(), input_bcs, pin);
   pbval->SetBoundaryFlags(boundary_flag);
+  pbswarm = std::make_unique<BoundarySwarms>(shared_from_this(), input_bcs, pin);
+  pbswarm->SetBoundaryFlags(boundary_flag);
 
-  // Add field properties data
-  // TOOD(JMM): Should packages be resolved for state descriptors in
-  // properties?
-  for (int i = 0; i < properties.size(); i++) {
-    StateDescriptor &state = properties[i]->State();
-    for (auto const &q : state.AllFields()) {
-      real_container->Add(q.first, q.second);
-    }
-    for (auto const &q : state.AllSparseFields()) {
-      for (auto const &p : q.second) {
-        real_container->Add(q.first, p.second);
-      }
-    }
-  }
   // Add physics data, including dense, sparse, and swarm variables.
   // Resolve issues.
   resolved_packages = ResolvePackages(packages);
@@ -173,9 +159,24 @@ void MeshBlock::Initialize(int igid, int ilid, LogicalLocation iloc,
   }
 
   // TODO(jdolence): Should these loops be moved to Variable creation
-  MeshBlockDataIterator<Real> ci(real_container, {Metadata::Independent});
+  // TODO(JMM): What variables should be in vars_cc_? They are used
+  // for counting load-balance cost. Should it be different than the
+  // variables used for refinement?
+  // Should we even have both of these arrays? Are they both necessary?
+
+  // TODO(JMM): In principal this should be `Metadata::Independent`
+  // only. However, I am making it `Metadata::Independent` OR
+  // `Metadata::FillGhost` to work around the old Athena++
+  // `bvals_refine` machinery. When this machinery is completely
+  // removed, which can happen after dense-on-block for sparse
+  // variables is in place and after we write "prolongate-in-one,"
+  // this should be only for `Metadata::Independent`.
+  MeshBlockDataIterator<Real> ci(real_container,
+                                 {Metadata::Independent, Metadata::FillGhost}, true);
   int nindependent = ci.vars.size();
   for (int n = 0; n < nindependent; n++) {
+    // These are used for approximating number of vars registered for refinement
+    // for the purposes of computing load balancing work
     RegisterMeshBlockData(ci.vars[n]);
   }
 
@@ -183,6 +184,7 @@ void MeshBlock::Initialize(int igid, int ilid, LogicalLocation iloc,
     pmr = std::make_unique<MeshRefinement>(shared_from_this(), pin);
     // This is very redundant, I think, but necessary for now
     for (int n = 0; n < nindependent; n++) {
+      // These are used for doing refinement
       pmr->AddToRefinement(ci.vars[n]->data, ci.vars[n]->coarse_s);
     }
   }

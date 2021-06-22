@@ -116,6 +116,7 @@ add_library(parthenon
   bvals/boundary_flag.cpp
   bvals/bvals_refine.cpp
   bvals/bvals_var.cpp
+  bvals/bvals_swarm.cpp
 
   coordinates/coordinates.hpp
   coordinates/uniform_cartesian.hpp
@@ -136,8 +137,6 @@ add_library(parthenon
   interface/metadata.cpp
   interface/metadata.hpp
   interface/params.hpp
-  interface/properties_interface.cpp
-  interface/properties_interface.hpp
   interface/sparse_variable.cpp
   interface/sparse_variable.hpp
   interface/state_descriptor.hpp
@@ -159,6 +158,8 @@ add_library(parthenon
   mesh/meshblock_tree.cpp
   mesh/meshblock_tree.hpp
   mesh/meshblock.cpp
+  mesh/refinement_cc_in_one.cpp
+  mesh/refinement_cc_in_one.hpp
 
   outputs/formatted_table.cpp
   outputs/history.cpp
@@ -220,7 +221,12 @@ add_library(Parthenon::parthenon ALIAS parthenon)
 
 set_target_properties(parthenon PROPERTIES SOVERSION ${parthenon_VERSION})
 
-target_compile_features(parthenon PUBLIC cxx_std_17)
+if (PARTHENON_ENABLE_CPP17)
+  target_compile_features(parthenon PUBLIC cxx_std_17)
+else()
+  target_compile_features(parthenon PUBLIC cxx_std_14)
+endif()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "XL")
   target_compile_options(parthenon PUBLIC -std=c++1y -qxflag=disable__cplusplusOverride)
 endif()

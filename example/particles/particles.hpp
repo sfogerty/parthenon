@@ -1,5 +1,5 @@
 //========================================================================================
-// (C) (or copyright) 2020. Triad National Security, LLC. All rights reserved.
+// (C) (or copyright) 2020-2021. Triad National Security, LLC. All rights reserved.
 //
 // This program was produced under U.S. Government contract 89233218CNA000001 for Los
 // Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC
@@ -28,11 +28,17 @@ namespace particles_example {
 
 typedef Kokkos::Random_XorShift64_Pool<> RNGPool;
 
-class ParticleDriver : public MultiStageDriver {
+class ParticleDriver : public EvolutionDriver {
  public:
   ParticleDriver(ParameterInput *pin, ApplicationInput *app_in, Mesh *pm)
-      : MultiStageDriver(pin, app_in, pm) {}
-  TaskCollection MakeTaskCollection(BlockList_t &blocks, int stage);
+      : EvolutionDriver(pin, app_in, pm), integrator(pin) {}
+  TaskCollection MakeParticlesCreationTaskCollection() const;
+  TaskCollection MakeParticlesUpdateTaskCollection() const;
+  TaskCollection MakeFinalizationTaskCollection() const;
+  TaskListStatus Step();
+
+ private:
+  StagedIntegrator integrator;
 };
 
 void ProblemGenerator(MeshBlock *pmb, ParameterInput *pin);
