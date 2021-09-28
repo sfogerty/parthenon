@@ -242,19 +242,21 @@ void ParthenonManager::RestartPackages(Mesh &rm, RestartReader &resfile) {
   // Allocate space based on largest vector
   int max_vlen = 1;
   int num_sparse = 0;
-  for (auto &v : indep_restart_vars) {
+  for (auto &v_info : indep_restart_vars) {
+    const auto &label = v_info->label();
+
     // check that variable is in the list of sparse fields if and only if it is sparse
-    if (v->IsSparse()) {
+    if (v_info->IsSparse()) {
       ++num_sparse;
-      PARTHENON_REQUIRE_THROWS(sparse_idxs.count(v->label()) == 1,
-                               "Sparse field " + v->label() +
+      PARTHENON_REQUIRE_THROWS(sparse_idxs.count(label) == 1,
+                               "Sparse field " + label +
                                    " is not marked as sparse in restart file");
     } else {
-      PARTHENON_REQUIRE_THROWS(sparse_idxs.count(v->label()) == 0,
-                               "Dense field " + v->label() +
+      PARTHENON_REQUIRE_THROWS(sparse_idxs.count(label) == 0,
+                               "Dense field " + label +
                                    " is marked as sparse in restart file");
     }
-    max_vlen = std::max(max_vlen, v->GetDim(4));
+    max_vlen = std::max(max_vlen, v_info->NumComponents());
   }
 
   // make sure we have all sparse variables that are in the restart file
@@ -264,7 +266,7 @@ void ParthenonManager::RestartPackages(Mesh &rm, RestartReader &resfile) {
 
   std::vector<Real> tmp(static_cast<size_t>(nb) * nCells * max_vlen);
   for (auto &v_info : indep_restart_vars) {
-    const auto vlen = v_info->GetDim(4);
+    const auto vlen = v_info->NumComponents();
     const auto &label = v_info->label();
 
     if (Globals::my_rank == 0) std::cout << "Var:" << label << ":" << vlen << std::endl;
@@ -272,8 +274,9 @@ void ParthenonManager::RestartPackages(Mesh &rm, RestartReader &resfile) {
     try {
       resfile.ReadBlocks(label, myBlocks, tmp, bsize, vlen);
     } catch (std::exception &ex) {
-      std::cout << " WARNING: Failed to read variable " << label
-                << " from restart file. Error message: " << ex.what() << std::endl;
+      std::cout << "[" << Globals::my_rank << "] WARNING: Failed to read variable "
+                << label << " from restart file:" << std::endl
+                << ex.what() << std::endl;
       continue;
     }
 
