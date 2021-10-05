@@ -28,6 +28,7 @@
 #include "interface/params.hpp"
 #include "interface/state_descriptor.hpp"
 
+#include "interface/variable_pack.hpp"
 #include "kokkos_abstraction.hpp"
 #include "mesh/domain.hpp"
 
@@ -71,13 +72,15 @@ TaskStatus WeightedSumData(const std::vector<F> &flags, T *in1, T *in2, const Re
   const auto &x = in1->PackVariables(flags);
   const auto &y = in2->PackVariables(flags);
   const auto &z = out->PackVariables(flags);
+  AllocatedIndices idxs(x, y, z);
+
   parthenon::par_for(
-      DEFAULT_LOOP_PATTERN, "WeightedSumData", DevExecSpace(), 0, x.GetDim(5) - 1, 0,
-      x.GetDim(4) - 1, 0, x.GetDim(3) - 1, 0, x.GetDim(2) - 1, 0, x.GetDim(1) - 1,
-      KOKKOS_LAMBDA(const int b, const int l, const int k, const int j, const int i) {
-        if (x.IsAllocated(b, l) && y.IsAllocated(b, l) && z.IsAllocated(b, l)) {
-          z(b, l, k, j, i) = w1 * x(b, l, k, j, i) + w2 * y(b, l, k, j, i);
-        }
+      DEFAULT_LOOP_PATTERN, "WeightedSumData", DevExecSpace(), 0, idxs.size() - 1, 0,
+      x.GetDim(3) - 1, 0, x.GetDim(2) - 1, 0, x.GetDim(1) - 1,
+      KOKKOS_LAMBDA(const int a, const int k, const int j, const int i) {
+        const int b = idxs.GetBlockIdx(a);
+        const int l = idxs.GetVarIdx(a);
+        z(b, l, k, j, i) = w1 * x(b, l, k, j, i) + w2 * y(b, l, k, j, i);
       });
   Kokkos::Profiling::popRegion(); // Task_WeightedSumData
   return TaskStatus::complete;

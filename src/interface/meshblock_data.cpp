@@ -222,7 +222,7 @@ const VariableFluxPack<T> &MeshBlockData<T>::PackListedVariablesAndFluxes(
     make_new_pack = true;
   } else {
     // we have a cached pack, check allocation status
-    if ((var_list.alloc_status() != itr->second.alloc_status) ||
+    if ((var_list.alloc_status() != itr->second.var_alloc_status) ||
         (flux_list.alloc_status() != itr->second.flux_alloc_status)) {
       // allocation statuses differ, need to make a new pack and remove outdated one
       make_new_pack = true;
@@ -232,13 +232,13 @@ const VariableFluxPack<T> &MeshBlockData<T>::PackListedVariablesAndFluxes(
 
   if (make_new_pack) {
     FluxPackIndxPair<T> new_item;
-    new_item.alloc_status = var_list.alloc_status();
+    new_item.var_alloc_status = var_list.alloc_status();
     new_item.flux_alloc_status = flux_list.alloc_status();
     new_item.pack = MakeFluxPack(var_list, flux_list, &new_item.map);
     itr = varFluxPackMap_.insert({keys, new_item}).first;
 
     // need to grab pointers here
-    itr->second.pack.alloc_status_ = &itr->second.alloc_status;
+    itr->second.pack.alloc_status_ = &itr->second.var_alloc_status;
     itr->second.pack.flux_alloc_status_ = &itr->second.flux_alloc_status;
   }
 
@@ -274,7 +274,7 @@ MeshBlockData<T>::PackListedVariables(const VarLabelList &var_list, bool coarse,
     make_new_pack = true;
   } else {
     // we have a cached pack, check allocation status
-    if (var_list.alloc_status() != itr->second.alloc_status) {
+    if (var_list.alloc_status() != itr->second.var_alloc_status) {
       // allocation statuses differ, need to make a new pack and remove outdated one
       make_new_pack = true;
       packmap.erase(itr);
@@ -283,13 +283,13 @@ MeshBlockData<T>::PackListedVariables(const VarLabelList &var_list, bool coarse,
 
   if (make_new_pack) {
     PackIndxPair<T> new_item;
-    new_item.alloc_status = var_list.alloc_status();
+    new_item.var_alloc_status = var_list.alloc_status();
     new_item.pack = MakePack<T>(var_list, coarse, &new_item.map);
 
     itr = packmap.insert({key, new_item}).first;
 
     // need to grab pointers after map insertion
-    itr->second.pack.alloc_status_ = &itr->second.alloc_status;
+    itr->second.pack.alloc_status_ = &itr->second.var_alloc_status;
   }
 
   if (map != nullptr) {

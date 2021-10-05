@@ -24,7 +24,9 @@
 #include "defs.hpp"
 #include "interface/metadata.hpp"
 #include "interface/sparse_pool.hpp"
+#include "interface/variable_pack.hpp"
 #include "kokkos_abstraction.hpp"
+#include "parthenon/prelude.hpp"
 #include "reconstruct/dc_inline.hpp"
 #include "sparse_advection_package.hpp"
 
@@ -116,6 +118,7 @@ AmrTag CheckRefinement(MeshBlockData<Real> *rc) {
   }
   // type is parthenon::VariablePack<CellVariable<Real>>
   const auto &v = rc->PackVariables(vars);
+  AllocatedIndices idxs(v);
 
   IndexRange ib = pmb->cellbounds.GetBoundsI(IndexDomain::entire);
   IndexRange jb = pmb->cellbounds.GetBoundsJ(IndexDomain::entire);
@@ -123,16 +126,15 @@ AmrTag CheckRefinement(MeshBlockData<Real> *rc) {
 
   typename Kokkos::MinMax<Real>::value_type minmax;
   pmb->par_reduce(
-      "advection check refinement", 0, v.GetDim(4) - 1, kb.s, kb.e, jb.s, jb.e, ib.s,
+      "advection check refinement", 0, idxs.size() - 1, kb.s, kb.e, jb.s, jb.e, ib.s,
       ib.e,
-      KOKKOS_LAMBDA(const int n, const int k, const int j, const int i,
+      KOKKOS_LAMBDA(const int a, const int k, const int j, const int i,
                     typename Kokkos::MinMax<Real>::value_type &lminmax) {
-        if (v.IsAllocated(n)) {
-          lminmax.min_val =
-              (v(n, k, j, i) < lminmax.min_val ? v(n, k, j, i) : lminmax.min_val);
-          lminmax.max_val =
-              (v(n, k, j, i) > lminmax.max_val ? v(n, k, j, i) : lminmax.max_val);
-        }
+        const int n = idxs.GetVarIdx(a);
+        lminmax.min_val =
+            (v(n, k, j, i) < lminmax.min_val ? v(n, k, j, i) : lminmax.min_val);
+        lminmax.max_val =
+            (v(n, k, j, i) > lminmax.max_val ? v(n, k, j, i) : lminmax.max_val);
       },
       Kokkos::MinMax<Real>(minmax));
 
@@ -197,6 +199,7 @@ TaskStatus CalculateFluxes(std::shared_ptr<MeshBlockData<Real>> &rc) {
 
   const auto &v =
       rc->PackVariablesAndFluxes(std::vector<MetadataFlag>{Metadata::WithFluxes});
+  AllocatedIndices idxs(v);
 
   const int scratch_level = 1; // 0 is actual scratch (tiny); 1 is HBM
   const int nx1 = pmb->cellbounds.ncellsi(IndexDomain::entire);
@@ -210,13 +213,13 @@ TaskStatus CalculateFluxes(std::shared_ptr<MeshBlockData<Real>> &rc) {
         parthenon::ScratchPad2D<Real> qr(member.team_scratch(scratch_level), nvar, nx1);
 
         // get reconstructed state on faces
-        parthenon::DonorCellX1(member, k, j, ib.s - 1, ib.e + 1, v, ql, qr);
+        parthenon::DonorCellX1(member, idxs, k, j, ib.s - 1, ib.e + 1, v, ql, qr);
 
         // Sync all threads in the team so that scratch memory is consistent
         member.team_barrier();
 
-        for (int n = 0; n < nvar; n++) {
-          if (!v.IsAllocated(n)) continue;
+        for (int a = 0; a < idxs.size(); a++) {
+          const int n = idxs.GetVarIdx(a);
           const auto this_v = vx[n % NUM_FIELDS];
           par_for_inner(member, ib.s, ib.e + 1, [&](const int i) {
             v.flux(X1DIR, n, k, j, i) = (this_v > 0.0 ? ql(n, i) : qr(n, i)) * this_v;
@@ -239,14 +242,14 @@ TaskStatus CalculateFluxes(std::shared_ptr<MeshBlockData<Real>> &rc) {
                                                  nx1);
 
           // get reconstructed state on faces
-          parthenon::DonorCellX2(member, k, j - 1, ib.s, ib.e, v, ql, q_unused);
-          parthenon::DonorCellX2(member, k, j, ib.s, ib.e, v, q_unused, qr);
+          parthenon::DonorCellX2(member, idxs, k, j - 1, ib.s, ib.e, v, ql, q_unused);
+          parthenon::DonorCellX2(member, idxs, k, j, ib.s, ib.e, v, q_unused, qr);
 
           // Sync all threads in the team so that scratch memory is consistent
           member.team_barrier();
 
-          for (int n = 0; n < nvar; n++) {
-            if (!v.IsAllocated(n)) continue;
+          for (int a = 0; a < idxs.size(); a++) {
+            const int n = idxs.GetVarIdx(a);
             const auto this_v = vy[n % NUM_FIELDS];
             par_for_inner(member, ib.s, ib.e, [&](const int i) {
               v.flux(X2DIR, n, k, j, i) = (this_v > 0.0 ? ql(n, i) : qr(n, i)) * this_v;

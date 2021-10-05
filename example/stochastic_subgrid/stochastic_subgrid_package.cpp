@@ -26,6 +26,7 @@
 #include <coordinates/coordinates.hpp>
 #include <parthenon/package.hpp>
 
+#include "interface/variable_pack.hpp"
 #include "kokkos_abstraction.hpp"
 #include "reconstruct/dc_inline.hpp"
 #include "utils/alias_method.hpp"
@@ -370,6 +371,8 @@ TaskStatus CalculateFluxes(std::shared_ptr<MeshBlockData<Real>> &rc) {
   const IndexRange kb = pmb->cellbounds.GetBoundsK(IndexDomain::interior);
 
   const auto &advected = rc->PackVariables(std::vector<std::string>{"advected"});
+  AllocatedIndices idxs(advected);
+
   auto pkg = pmb->packages.Get("stochastic_subgrid_package");
   const auto &vx = pkg->Param<Real>("vx");
   const auto &vy = pkg->Param<Real>("vy");
@@ -387,7 +390,7 @@ TaskStatus CalculateFluxes(std::shared_ptr<MeshBlockData<Real>> &rc) {
         parthenon::ScratchPad2D<Real> ql(member.team_scratch(scratch_level), nvar, nx1);
         parthenon::ScratchPad2D<Real> qr(member.team_scratch(scratch_level), nvar, nx1);
         // get reconstructed state on faces
-        parthenon::DonorCellX1(member, k, j, ib.s - 1, ib.e + 1, advected, ql, qr);
+        parthenon::DonorCellX1(member, idxs, k, j, ib.s - 1, ib.e + 1, advected, ql, qr);
         // Sync all threads in the team so that scratch memory is consistent
         member.team_barrier();
 
@@ -418,8 +421,9 @@ TaskStatus CalculateFluxes(std::shared_ptr<MeshBlockData<Real>> &rc) {
           parthenon::ScratchPad2D<Real> q_unused(member.team_scratch(scratch_level), nvar,
                                                  nx1);
           // get reconstructed state on faces
-          parthenon::DonorCellX2(member, k, j - 1, ib.s, ib.e, advected, ql, q_unused);
-          parthenon::DonorCellX2(member, k, j, ib.s, ib.e, advected, q_unused, qr);
+          parthenon::DonorCellX2(member, idxs, k, j - 1, ib.s, ib.e, advected, ql,
+                                 q_unused);
+          parthenon::DonorCellX2(member, idxs, k, j, ib.s, ib.e, advected, q_unused, qr);
           // Sync all threads in the team so that scratch memory is consistent
           member.team_barrier();
           for (int n = 0; n < nvar; n++) {
@@ -450,8 +454,9 @@ TaskStatus CalculateFluxes(std::shared_ptr<MeshBlockData<Real>> &rc) {
           parthenon::ScratchPad2D<Real> q_unused(member.team_scratch(scratch_level), nvar,
                                                  nx1);
           // get reconstructed state on faces
-          parthenon::DonorCellX3(member, k - 1, j, ib.s, ib.e, advected, ql, q_unused);
-          parthenon::DonorCellX3(member, k, j, ib.s, ib.e, advected, q_unused, qr);
+          parthenon::DonorCellX3(member, idxs, k - 1, j, ib.s, ib.e, advected, ql,
+                                 q_unused);
+          parthenon::DonorCellX3(member, idxs, k, j, ib.s, ib.e, advected, q_unused, qr);
           // Sync all threads in the team so that scratch memory is consistent
           member.team_barrier();
           for (int n = 0; n < nvar; n++) {

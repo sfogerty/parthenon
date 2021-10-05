@@ -1,5 +1,5 @@
 //========================================================================================
-// (C) (or copyright) 2020. Triad National Security, LLC. All rights reserved.
+// (C) (or copyright) 2020-2021. Triad National Security, LLC. All rights reserved.
 //
 // This program was produced under U.S. Government contract 89233218CNA000001 for Los
 // Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC
@@ -22,6 +22,7 @@
 #include <interface/meshblock_data.hpp>
 #include <interface/swarm_container.hpp>
 #include <interface/variable.hpp>
+#include <interface/variable_pack.hpp>
 #include <mesh/domain.hpp>
 #include <mesh/mesh.hpp>
 #include <parthenon_arrays.hpp>
@@ -30,6 +31,7 @@
 
 namespace parthenon {
 namespace prelude {
+using ::parthenon::AllocatedIndices;
 using ::parthenon::BoundaryCommSubset;
 using ::parthenon::CellVariable;
 using ::parthenon::IndexDomain;

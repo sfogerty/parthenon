@@ -79,25 +79,27 @@ struct AllocationStatusCollector {
 // Specialization for VariablePack<T>
 template <typename T>
 struct AllocationStatusCollector<VariablePack<T>> {
-  static inline void Append(std::vector<bool> *alloc_status_collection,
-                            const VariablePack<T> &var_pack) {
-    alloc_status_collection->insert(alloc_status_collection->end(),
-                                    var_pack.alloc_status()->begin(),
-                                    var_pack.alloc_status()->end());
+  static inline void Append(std::vector<bool> *total_alloc_status,
+                            const VariablePack<T> &var_pack, bool /*only_var*/) {
+    total_alloc_status->insert(total_alloc_status->end(),
+                               var_pack.alloc_status()->begin(),
+                               var_pack.alloc_status()->end());
   }
 };
 
 // Specialization for VariableFluxPack<T>
 template <typename T>
 struct AllocationStatusCollector<VariableFluxPack<T>> {
-  static inline void Append(std::vector<bool> *alloc_status_collection,
-                            const VariableFluxPack<T> &var_flux_pack) {
-    alloc_status_collection->insert(alloc_status_collection->end(),
-                                    var_flux_pack.alloc_status()->cbegin(),
-                                    var_flux_pack.alloc_status()->cend());
-    alloc_status_collection->insert(alloc_status_collection->end(),
-                                    var_flux_pack.flux_alloc_status()->cbegin(),
-                                    var_flux_pack.flux_alloc_status()->cend());
+  static inline void Append(std::vector<bool> *total_alloc_status,
+                            const VariableFluxPack<T> &var_flux_pack, bool only_var) {
+    total_alloc_status->insert(total_alloc_status->end(),
+                               var_flux_pack.alloc_status()->cbegin(),
+                               var_flux_pack.alloc_status()->cend());
+    if (!only_var) {
+      total_alloc_status->insert(total_alloc_status->end(),
+                                 var_flux_pack.flux_alloc_status()->cbegin(),
+                                 var_flux_pack.flux_alloc_status()->cend());
+    }
   }
 };
 
@@ -116,12 +118,13 @@ const MeshBlockPack<P> &PackOnMesh(M &map, BlockDataList_t<Real> &block_data_,
   PackIndexMap pack_idx_map;
   PackIndexMap this_map;
 
-  std::vector<bool> alloc_status_collection;
+  std::vector<bool> var_alloc_status, total_alloc_status;
 
   for (size_t i = 0; i < nblocks; i++) {
     const auto &pack = packing_function(block_data_[i], this_map, this_key);
     AppendKey(&total_key, &this_key);
-    AllocationStatusCollector<P>::Append(&alloc_status_collection, pack);
+    AllocationStatusCollector<P>::Append(&total_alloc_status, pack, false);
+    AllocationStatusCollector<P>::Append(&var_alloc_status, pack, true);
 
     if (i == 0) {
       pack_idx_map = this_map;
@@ -137,7 +140,7 @@ const MeshBlockPack<P> &PackOnMesh(M &map, BlockDataList_t<Real> &block_data_,
     make_new_pack = true;
   } else {
     // we have a cached pack, check allocation status
-    if (alloc_status_collection != itr->second.alloc_status) {
+    if (total_alloc_status != itr->second.total_alloc_status) {
       // allocation statuses differ, need to make a new pack and remove outdated one
       make_new_pack = true;
       map.erase(itr);
@@ -166,12 +169,16 @@ const MeshBlockPack<P> &PackOnMesh(M &map, BlockDataList_t<Real> &block_data_,
     Kokkos::deep_copy(coords, coords_host);
 
     typename M::mapped_type new_item;
-    new_item.alloc_status = alloc_status_collection;
+    new_item.total_alloc_status = total_alloc_status;
+    new_item.var_alloc_status = var_alloc_status;
     new_item.map = pack_idx_map;
     new_item.pack = MeshBlockPack<P>(packs, block_data_[0]->GetBlockPointer()->cellbounds,
                                      coords, dims);
 
     itr = map.insert({total_key, new_item}).first;
+
+    // need to grab pointers after map insertion
+    itr->second.pack.SetAllocStatus(&itr->second.var_alloc_status);
   }
 
   if (map_out != nullptr) {

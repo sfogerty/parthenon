@@ -57,6 +57,14 @@ class MeshBlockPack {
     return v_(block)(n)(k, j, i);
   }
 
+  // IsAllocated is only availble on the device, this gives allocation status on the host
+  inline bool IsAllocHost(int block, int var) const {
+    assert(0 <= block && block < GetDim(5));
+    assert(0 <= var && var < GetDim(4));
+    return (*alloc_status_)[block * GetDim(4) + var];
+  }
+
+  // Note: Device only
   KOKKOS_FORCEINLINE_FUNCTION bool IsAllocated(const int block, const int var) const {
     return v_(block).GetDim(4) > var && v_(block).IsAllocated(var);
   }
@@ -75,10 +83,17 @@ class MeshBlockPack {
   IndexShape cellbounds;
   ParArray1D<Coordinates_t> coords;
 
+  void SetAllocStatus(const std::vector<bool> *alloc_status) {
+    alloc_status_ = alloc_status;
+  }
+
  private:
   ParArray1D<T> v_;
   std::array<int, 5> dims_;
   int ndim_;
+
+  // lives on host
+  const std::vector<bool> *alloc_status_;
 };
 
 template <typename T>

@@ -3,7 +3,7 @@
 // Copyright(C) 2020 The Parthenon collaboration
 // Licensed under the 3-clause BSD License, see LICENSE file for details
 //========================================================================================
-// (C) (or copyright) 2020. Triad National Security, LLC. All rights reserved.
+// (C) (or copyright) 2020-2021. Triad National Security, LLC. All rights reserved.
 //
 // This program was produced under U.S. Government contract 89233218CNA000001 for Los
 // Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC
@@ -19,6 +19,7 @@
 //! \file dc.hpp
 //  \brief implements donor cell reconstruction
 
+#include "interface/variable_pack.hpp"
 #include "kokkos_abstraction.hpp"
 
 using parthenon::ScratchPad2D;
@@ -31,13 +32,12 @@ namespace parthenon {
 
 template <typename T>
 KOKKOS_FORCEINLINE_FUNCTION void
-DonorCellX1(parthenon::team_mbr_t const &member, const int k, const int j, const int il,
-            const int iu, const T &q, ScratchPad2D<Real> &ql, ScratchPad2D<Real> &qr) {
-  const int nu = q.GetDim(4) - 1;
-
+DonorCellX1(parthenon::team_mbr_t const &member, const AllocatedIndices &idxs,
+            const int k, const int j, const int il, const int iu, const T &q,
+            ScratchPad2D<Real> &ql, ScratchPad2D<Real> &qr) {
   // compute L/R states for each variable
-  for (int n = 0; n <= nu; ++n) {
-    if (!q.IsAllocated(n)) continue;
+  for (int a = 0; a < idxs.size(); ++a) {
+    const int n = idxs.GetVarIdx(a);
     parthenon::par_for_inner(
         member, il, iu, [&](const int i) { ql(n, i + 1) = qr(n, i) = q(n, k, j, i); });
   }
@@ -48,12 +48,12 @@ DonorCellX1(parthenon::team_mbr_t const &member, const int k, const int j, const
 //  \brief
 template <typename T>
 KOKKOS_FORCEINLINE_FUNCTION void
-DonorCellX2(parthenon::team_mbr_t const &member, const int k, const int j, const int il,
-            const int iu, const T &q, ScratchPad2D<Real> &ql, ScratchPad2D<Real> &qr) {
-  const int nu = q.GetDim(4) - 1;
+DonorCellX2(parthenon::team_mbr_t const &member, const AllocatedIndices &idxs,
+            const int k, const int j, const int il, const int iu, const T &q,
+            ScratchPad2D<Real> &ql, ScratchPad2D<Real> &qr) {
   // compute L/R states for each variable
-  for (int n = 0; n <= nu; ++n) {
-    if (!q.IsAllocated(n)) continue;
+  for (int a = 0; a < idxs.size(); ++a) {
+    const int n = idxs.GetVarIdx(a);
     parthenon::par_for_inner(member, il, iu,
                              [&](const int i) { ql(n, i) = qr(n, i) = q(n, k, j, i); });
   }
@@ -64,12 +64,12 @@ DonorCellX2(parthenon::team_mbr_t const &member, const int k, const int j, const
 //  \brief
 template <typename T>
 KOKKOS_FORCEINLINE_FUNCTION void
-DonorCellX3(parthenon::team_mbr_t const &member, const int k, const int j, const int il,
-            const int iu, const T &q, ScratchPad2D<Real> &ql, ScratchPad2D<Real> &qr) {
-  const int nu = q.GetDim(4) - 1;
+DonorCellX3(parthenon::team_mbr_t const &member, const AllocatedIndices &idxs,
+            const int k, const int j, const int il, const int iu, const T &q,
+            ScratchPad2D<Real> &ql, ScratchPad2D<Real> &qr) {
   // compute L/R states for each variable
-  for (int n = 0; n <= nu; ++n) {
-    if (!q.IsAllocated(n)) continue;
+  for (int a = 0; a < idxs.size(); ++a) {
+    const int n = idxs.GetVarIdx(a);
     parthenon::par_for_inner(member, il, iu,
                              [&](const int i) { ql(n, i) = qr(n, i) = q(n, k, j, i); });
   }

@@ -74,7 +74,12 @@ class VarListWithLabels {
         (sparse_ids.count(var->GetSparseID()) > 0)) {
       vars_.push_back(var);
       labels_.push_back(var->label());
-      alloc_status_.push_back(var->IsAllocated());
+
+      // we use alloc_status_ to get the allocation status of individual components, so we
+      // need one entry per component
+      for (int i = 0; i < var->NumComponents(); ++i) {
+        alloc_status_.push_back(var->IsAllocated());
+      }
     }
   }
 
@@ -177,6 +182,14 @@ class VariablePack {
 
   // host only
   inline auto alloc_status() const { return alloc_status_; }
+
+  // IsAllocated is only availble on the device, this gives allocation status on the host,
+  // use same function signature as for MeshBlockPack
+  inline bool IsAllocHost(int block, int var) const {
+    assert(block == 0);
+    assert(0 <= var && var < alloc_status_->size());
+    return (*alloc_status_)[var];
+  }
 
   // Note: Device only
   KOKKOS_FORCEINLINE_FUNCTION
@@ -325,6 +338,83 @@ class VariableFluxPack : public VariablePack<T> {
   const std::vector<bool> *flux_alloc_status_;
 };
 
+// This is a helper class that make a list of block-variable index pairs of all allocated
+// variables and moves them to the GPU, so that one can iterate over only the allocated
+// variables instead of checking if a variable is allocated in an inner loop
+class AllocatedIndices {
+ public:
+  template <typename FIRST, typename... REST>
+  explicit AllocatedIndices(const FIRST &first, REST &&... rest) {
+    auto num_blocks = first.GetDim(5);
+    auto num_vars = first.GetDim(4);
+
+    if (sizeof...(rest) > 0) {
+      // make sure the other packs have the same number of blocks and variables
+      auto check_dim = [num_blocks, num_vars](const auto &pack) {
+        assert(pack.GetDim(5) == num_blocks);
+        assert(pack.GetDim(4) == num_vars);
+      };
+
+      // using expander trick to loop over rest, see https://stackoverflow.com/a/25683817
+      int dummy[] = {0, ((void)check_dim(std::forward<REST>(rest)), 0)...};
+    }
+
+    // get block-variable index pairs of allocated variables
+    std::vector<std::array<int, 2>> alloc_indices;
+
+    for (int b = 0; b < num_blocks; ++b) {
+      for (int n = 0; n < num_vars; ++n) {
+        bool allocated = first.IsAllocHost(b, n);
+
+        if ((sizeof...(rest) > 0) && allocated) {
+          auto check_alloc = [b, n, &allocated](const auto &pack) {
+            if (!pack.IsAllocHost(b, n)) {
+              allocated = false;
+            }
+          };
+
+          // using expander trick again, see https://stackoverflow.com/a/25683817
+          int dummy[] = {0, ((void)check_alloc(std::forward<REST>(rest)), 0)...};
+        }
+
+        if (allocated) {
+          alloc_indices.push_back({b, n});
+        }
+      }
+    }
+
+    num_indices = alloc_indices.size();
+
+    indices = ParArray2D<int>("AllocatedIndices", alloc_indices.size(), 2);
+    auto indices_h = Kokkos::create_mirror_view(indices);
+    for (size_t i = 0; i < alloc_indices.size(); ++i) {
+      indices_h(i, 0) = alloc_indices[i][0];
+      indices_h(i, 1) = alloc_indices[i][1];
+    }
+
+    Kokkos::deep_copy(indices, indices_h);
+  }
+
+  KOKKOS_FORCEINLINE_FUNCTION
+  int size() const { return num_indices; }
+
+  KOKKOS_FORCEINLINE_FUNCTION
+  int GetBlockIdx(int n) const {
+    assert(0 <= n && n < num_indices);
+    return indices(n, 0);
+  }
+
+  KOKKOS_FORCEINLINE_FUNCTION
+  int GetVarIdx(int n) const {
+    assert(0 <= n && n < num_indices);
+    return indices(n, 1);
+  }
+
+ private:
+  int num_indices;
+  ParArray2D<int> indices;
+};
+
 // Using std::map, not std::unordered_map because the key
 // would require a custom hashing function. Note this is slower: O(log(N))
 // instead of O(1).
@@ -336,8 +426,7 @@ template <typename PackType>
 struct PackAndIndexMap {
   PackType pack;
   PackIndexMap map;
-  std::vector<bool> alloc_status;
-  std::vector<bool> flux_alloc_status;
+  std::vector<bool> var_alloc_status, flux_alloc_status, total_alloc_status;
 };
 
 template <typename T>

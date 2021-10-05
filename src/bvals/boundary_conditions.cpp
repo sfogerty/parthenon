@@ -18,6 +18,7 @@
 #include "bvals/bvals_interfaces.hpp"
 #include "defs.hpp"
 #include "interface/meshblock_data.hpp"
+#include "interface/variable_pack.hpp"
 #include "mesh/domain.hpp"
 #include "mesh/mesh.hpp"
 #include "mesh/meshblock.hpp"
@@ -102,7 +103,8 @@ void GenericBC(std::shared_ptr<MeshBlockData<Real>> &rc, bool coarse) {
   const int ref = INNER ? range.s : range.e;
 
   auto q = rc->PackVariables(std::vector<MetadataFlag>{Metadata::FillGhost}, coarse);
-  auto nb = IndexRange{0, q.GetDim(4) - 1};
+  AllocatedIndices idxs(q);
+  auto nb = IndexRange{0, idxs.size() - 1};
 
   std::string label = (TYPE == BCType::Reflect ? "Reflect" : "Outflow");
   label += (INNER ? "Inner" : "Outer");
@@ -119,8 +121,8 @@ void GenericBC(std::shared_ptr<MeshBlockData<Real>> &rc, bool coarse) {
 
   pmb->par_for_bndry(
       label, nb, domain, coarse,
-      KOKKOS_LAMBDA(const int &l, const int &k, const int &j, const int &i) {
-        if (!q.IsAllocated(l)) return;
+      KOKKOS_LAMBDA(const int &a, const int &k, const int &j, const int &i) {
+        const int l = idxs.GetVarIdx(a);
         if (TYPE == BCType::Reflect) {
           const bool reflect = (q.VectorComponent(l) == DIR);
           q(l, k, j, i) =
