@@ -73,8 +73,9 @@ void ProblemGenerator(MeshBlock *pmb, ParameterInput *pin) {
   if (profile == "block") profile_type = 3;
 
   pmb->par_for(
-      "Advection::ProblemGenerator", 0, num_vars - 1, kb.s, kb.e, jb.s, jb.e, ib.s, ib.e,
-      KOKKOS_LAMBDA(const int n, const int k, const int j, const int i) {
+      "Advection::ProblemGenerator", kb.s, kb.e, jb.s, jb.e, ib.s, ib.e,
+      KOKKOS_LAMBDA(const int k, const int j, const int i) {
+        const int n = idx_adv;
         if (profile_type == 0) {
           Real x = cos_a2 * (coords.x1v(i) * cos_a3 + coords.x2v(j) * sin_a3) +
                    coords.x3v(k) * sin_a2;

@@ -1,0 +1,83 @@
+# ========================================================================================
+#  Athena++ astrophysical MHD code
+#  Copyright(C) 2014 James M. Stone <jmstone@princeton.edu> and other code contributors
+#  Licensed under the 3-clause BSD License, see LICENSE file for details
+# ========================================================================================
+#  (C) (or copyright) 2020-2021. Triad National Security, LLC. All rights reserved.
+#
+#  This program was produced under U.S. Government contract 89233218CNA000001 for Los
+#  Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC
+#  for the U.S. Department of Energy/National Nuclear Security Administration. All rights
+#  in the program are reserved by Triad National Security, LLC, and the U.S. Department
+#  of Energy/National Nuclear Security Administration. The Government is granted for
+#  itself and others acting on its behalf a nonexclusive, paid-up, irrevocable worldwide
+#  license in this material to reproduce, prepare derivative works, distribute copies to
+#  the public, perform publicly and display publicly, and to permit others to do so.
+# ========================================================================================
+
+<parthenon/job>
+problem_id = advection
+
+<parthenon/mesh>
+refinement  = static
+nghost = 2
+
+nx1        = 64       # Number of zones in X1-direction
+x1min      =-0.1       # minimum value of X1
+x1max      = 0.1       # maximum value of X1
+#ix1_bc     = outflow   # inner-X1 boundary flag
+#ox1_bc     = outflow   # outer-X1 boundary flag
+ix1_bc     = periodic  # inner-X1 boundary flag
+ox1_bc     = periodic  # outer-X1 boundary flag
+
+nx2        = 64       # Number of zones in X2-direction
+x2min      =-0.1       # minimum value of X2
+x2max      = 0.1       # maximum value of X2
+#ix2_bc     = outflow   # inner-X2 boundary flag
+#ox2_bc     = outflow   # outer-X2 boundary flag
+ix2_bc     = periodic  # inner-X1 boundary flag
+ox2_bc     = periodic  # outer-X1 boundary flag
+
+nx3        = 64       # Number of zones in X3-direction
+x3min      =-0.1       # minimum value of X3
+x3max      = 0.1       # maximum value of X3
+#ix3_bc     = outflow   # inner-X3 boundary flag
+#ox3_bc     = outflow   # outer-X3 boundary flag
+ix3_bc     = periodic  # inner-X1 boundary flag
+ox3_bc     = periodic  # outer-X1 boundary flag
+
+pack_size = -1
+
+<parthenon/static_refinement0>
+x1min = -0.0125
+x1max =  0.0125
+x2min = -0.0125
+x2max =  0.0125
+x3min = -0.0125
+x3max =  0.0125
+level = 2
+
+
+<parthenon/meshblock>
+nx1        = 32        # Number of zones in X1-direction
+nx2        = 32        # Number of zones in X2-direction
+nx3        = 32        # Number of zones in X3-direction
+
+
+<parthenon/time>
+nlim = 10
+tlim = 1.0
+integrator = rk2
+ncycle_out_mesh = -10000
+
+<Advection>
+cfl = 0.45
+vx = 1.0
+vy = 1.0
+vz = 1.0
+profile = smooth_gaussian
+
+compute_error = false
+num_vars = 1 # number of variables
+vec_size = 7 # size of each variable
+fill_derived = false # whether to fill one-copy test vars

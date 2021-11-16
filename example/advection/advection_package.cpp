@@ -211,9 +211,7 @@ std::shared_ptr<StateDescriptor> Initialize(ParameterInput *pin) {
   // add callbacks for HST output identified by the `hist_param_key`
   pkg->AddParam<>(parthenon::hist_param_key, hst_vars);
 
-  if (fill_derived) {
     pkg->FillDerivedBlock = SquareIt;
-  }
   pkg->CheckRefinementBlock = CheckRefinement;
   pkg->EstimateTimestepBlock = EstimateTimestepBlock;
 
@@ -292,20 +290,6 @@ void SquareIt(MeshBlockData<Real> *rc) {
   IndexRange jb = pmb->cellbounds.GetBoundsJ(IndexDomain::entire);
   IndexRange kb = pmb->cellbounds.GetBoundsK(IndexDomain::entire);
 
-  // packing in principle unnecessary/convoluted here and just done for demonstration
-  std::vector<std::string> vars({"one_minus_advected", "one_minus_advected_sq"});
-  PackIndexMap imap;
-  const auto &v = rc->PackVariables(vars, imap);
-
-  const int in = imap.get("one_minus_advected").first;
-  const int out = imap.get("one_minus_advected_sq").first;
-  const auto num_vars = rc->Get("advected").data.GetDim(4);
-  pmb->par_for(
-      "advection_package::SquareIt", 0, num_vars - 1, kb.s, kb.e, jb.s, jb.e, ib.s, ib.e,
-      KOKKOS_LAMBDA(const int n, const int k, const int j, const int i) {
-        v(out + n, k, j, i) = v(in + n, k, j, i) * v(in + n, k, j, i);
-      });
-
   // The following block/logic is also just added for regression testing.
   // More specifically, the "smooth_gaussian" profile is initially != 0 everywhere, but
   // initialializes IndexDomain::interior.
@@ -318,9 +302,9 @@ void SquareIt(MeshBlockData<Real> *rc) {
   if (profile == "smooth_gaussian") {
     const auto &advected = rc->Get("advected").data;
     pmb->par_for(
-        "advection_package::SquareIt bval check", 0, num_vars - 1, kb.s, kb.e, jb.s, jb.e,
-        ib.s, ib.e, KOKKOS_LAMBDA(const int n, const int k, const int j, const int i) {
-          PARTHENON_REQUIRE(advected(n, k, j, i) != 0.0,
+        "advection_package::SquareIt bval check", kb.s, kb.e, jb.s, jb.e,
+        ib.s, ib.e, KOKKOS_LAMBDA(const int k, const int j, const int i) {
+          PARTHENON_REQUIRE(advected(0, k, j, i) >= 1.0,
                             "Advected not properly initialized.");
         });
   }
