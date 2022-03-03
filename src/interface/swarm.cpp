@@ -100,7 +100,14 @@ void Swarm::AllocateBoundaries() {
     bounds_uptrs[0] = DeviceAllocate<ParticleBoundIX1Outflow>();
   } else if (bcs[0] == BoundaryFlag::periodic) {
     bounds_uptrs[0] = DeviceAllocate<ParticleBoundIX1Periodic>();
-  } else if (bcs[0] != BoundaryFlag::user) {
+  } else if (bcs[0] == BoundaryFlag::user) {
+    if (pmb->pmy_mesh->SwarmBndryFnctn[0] != nullptr) {
+      bounds_uptrs[0] = pmb->pmy_mesh->SwarmBndryFnctn[0]();
+    } else {
+      msg << "ix1 user boundary requested but provided function is null!";
+      PARTHENON_THROW(msg);
+    }
+  } else {
     msg << "ix1 boundary flag " << static_cast<int>(bcs[0]) << " not supported!";
     PARTHENON_THROW(msg);
   }
@@ -109,7 +116,14 @@ void Swarm::AllocateBoundaries() {
     bounds_uptrs[1] = DeviceAllocate<ParticleBoundOX1Outflow>();
   } else if (bcs[1] == BoundaryFlag::periodic) {
     bounds_uptrs[1] = DeviceAllocate<ParticleBoundOX1Periodic>();
-  } else if (bcs[1] != BoundaryFlag::user) {
+  } else if (bcs[1] == BoundaryFlag::user) {
+    if (pmb->pmy_mesh->SwarmBndryFnctn[1] != nullptr) {
+      bounds_uptrs[1] = pmb->pmy_mesh->SwarmBndryFnctn[1]();
+    } else {
+      msg << "ox1 user boundary requested but provided function is null!";
+      PARTHENON_THROW(msg);
+    }
+  } else {
     msg << "ox1 boundary flag " << static_cast<int>(bcs[1]) << " not supported!";
     PARTHENON_THROW(msg);
   }
@@ -118,7 +132,14 @@ void Swarm::AllocateBoundaries() {
     bounds_uptrs[2] = DeviceAllocate<ParticleBoundIX2Outflow>();
   } else if (bcs[2] == BoundaryFlag::periodic) {
     bounds_uptrs[2] = DeviceAllocate<ParticleBoundIX2Periodic>();
-  } else if (bcs[2] != BoundaryFlag::user) {
+  } else if (bcs[2] == BoundaryFlag::user) {
+    if (pmb->pmy_mesh->SwarmBndryFnctn[2] != nullptr) {
+      bounds_uptrs[2] = pmb->pmy_mesh->SwarmBndryFnctn[2]();
+    } else {
+      msg << "ix2 user boundary requested but provided function is null!";
+      PARTHENON_THROW(msg);
+    }
+  } else {
     msg << "ix2 boundary flag " << static_cast<int>(bcs[2]) << " not supported!";
     PARTHENON_THROW(msg);
   }
@@ -127,7 +148,14 @@ void Swarm::AllocateBoundaries() {
     bounds_uptrs[3] = DeviceAllocate<ParticleBoundOX2Outflow>();
   } else if (bcs[3] == BoundaryFlag::periodic) {
     bounds_uptrs[3] = DeviceAllocate<ParticleBoundOX2Periodic>();
-  } else if (bcs[3] != BoundaryFlag::user) {
+  } else if (bcs[3] == BoundaryFlag::user) {
+    if (pmb->pmy_mesh->SwarmBndryFnctn[3] != nullptr) {
+      bounds_uptrs[3] = pmb->pmy_mesh->SwarmBndryFnctn[3]();
+    } else {
+      msg << "ox2 user boundary requested but provided function is null!";
+      PARTHENON_THROW(msg);
+    }
+  } else {
     msg << "ox2 boundary flag " << static_cast<int>(bcs[3]) << " not supported!";
     PARTHENON_THROW(msg);
   }
@@ -136,7 +164,14 @@ void Swarm::AllocateBoundaries() {
     bounds_uptrs[4] = DeviceAllocate<ParticleBoundIX3Outflow>();
   } else if (bcs[4] == BoundaryFlag::periodic) {
     bounds_uptrs[4] = DeviceAllocate<ParticleBoundIX3Periodic>();
-  } else if (bcs[4] != BoundaryFlag::user) {
+  } else if (bcs[4] == BoundaryFlag::user) {
+    if (pmb->pmy_mesh->SwarmBndryFnctn[4] != nullptr) {
+      bounds_uptrs[4] = pmb->pmy_mesh->SwarmBndryFnctn[4]();
+    } else {
+      msg << "ix3 user boundary requested but provided function is null!";
+      PARTHENON_THROW(msg);
+    }
+  } else {
     msg << "ix3 boundary flag " << static_cast<int>(bcs[4]) << " not supported!";
     PARTHENON_THROW(msg);
   }
@@ -145,7 +180,14 @@ void Swarm::AllocateBoundaries() {
     bounds_uptrs[5] = DeviceAllocate<ParticleBoundOX3Outflow>();
   } else if (bcs[5] == BoundaryFlag::periodic) {
     bounds_uptrs[5] = DeviceAllocate<ParticleBoundOX3Periodic>();
-  } else if (bcs[5] != BoundaryFlag::user) {
+  } else if (bcs[5] == BoundaryFlag::user) {
+    if (pmb->pmy_mesh->SwarmBndryFnctn[5] != nullptr) {
+      bounds_uptrs[5] = pmb->pmy_mesh->SwarmBndryFnctn[5]();
+    } else {
+      msg << "ox3 user boundary requested but provided function is null!";
+      PARTHENON_THROW(msg);
+    }
+  } else {
     msg << "ox3 boundary flag " << static_cast<int>(bcs[5]) << " not supported!";
     PARTHENON_THROW(msg);
   }
