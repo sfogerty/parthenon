@@ -50,6 +50,7 @@ void MeshBlockData<T>::Initialize(
   varFluxPackMap_.clear();
 
   for (auto const &q : resolved_packages->AllFields()) {
+    printf("Adding field: %s\n", q.first.base_name.c_str());
     AddField(q.first.base_name, q.second, q.first.sparse_id);
   }
 }
