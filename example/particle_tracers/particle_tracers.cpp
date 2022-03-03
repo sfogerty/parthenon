@@ -1,9 +1,9 @@
 //========================================================================================
 // Parthenon performance portable AMR framework
-// Copyright(C) 2021 The Parthenon collaboration
+// Copyright(C) 2021-2022 The Parthenon collaboration
 // Licensed under the 3-clause BSD License, see LICENSE file for details
 //========================================================================================
-// (C) (or copyright) 2021. Triad National Security, LLC. All rights reserved.
+// (C) (or copyright) 2021-2022. Triad National Security, LLC. All rights reserved.
 //
 // This program was produced under U.S. Government contract 89233218CNA000001 for Los
 // Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC
@@ -154,8 +154,8 @@ std::shared_ptr<StateDescriptor> Initialize(ParameterInput *pin) {
   std::string swarm_name = "tracers";
   Metadata swarm_metadata({Metadata::Provides, Metadata::None});
   pkg->AddSwarm(swarm_name, swarm_metadata);
-  Metadata real_swarmvalue_metadata({Metadata::Real});
-  pkg->AddSwarmValue("id", swarm_name, Metadata({Metadata::Integer}));
+  Metadata real_swarmvalue_metadata({Metadata::Real, Metadata::Particle});
+  pkg->AddSwarmValue("id", swarm_name, Metadata({Metadata::Integer, Metadata::Particle}));
 
   pkg->EstimateTimestepBlock = EstimateTimestepBlock;
 
@@ -375,8 +375,7 @@ void ProblemGenerator(MeshBlock *pmb, ParameterInput *pin) {
   int num_tracers_meshblock = std::round(num_tracers * number_meshblock / number_mesh);
 
   ParArrayND<int> new_indices;
-  const auto new_particles_mask =
-      swarm->AddEmptyParticles(num_tracers_meshblock, new_indices);
+  swarm->AddEmptyParticles(num_tracers_meshblock, new_indices);
 
   auto &x = swarm->Get<Real>("x").Get();
   auto &y = swarm->Get<Real>("y").Get();

@@ -1,5 +1,5 @@
 //========================================================================================
-// (C) (or copyright) 2020-2021. Triad National Security, LLC. All rights reserved.
+// (C) (or copyright) 2020-2022. Triad National Security, LLC. All rights reserved.
 //
 // This program was produced under U.S. Government contract 89233218CNA000001 for Los
 // Alamos National Laboratory (LANL), which is operated by Triad National Security, LLC
@@ -220,12 +220,13 @@ class FaceVariable {
   inline bool IsSparse() const { return false; }
   inline int GetSparseID() const { return InvalidSparseID; }
 
-  FaceArray<T> data;
-
  private:
-  std::array<int, 6> dims_;
   Metadata m_;
   std::string label_;
+  std::array<int, 6> dims_;
+
+ public:
+  FaceArray<T> data;
 };
 
 ///
@@ -270,8 +271,7 @@ template <typename T>
 class ParticleVariable {
  public:
   /// Initialize a particle variable
-  ParticleVariable(const std::string &label, const int npool, const Metadata &metadata)
-      : data(label, npool), npool_(npool), m_(metadata), label_(label) {}
+  ParticleVariable(const std::string &label, const int npool, const Metadata &metadata);
 
   // accessors
   KOKKOS_FORCEINLINE_FUNCTION
@@ -282,7 +282,15 @@ class ParticleVariable {
   }
 
   KOKKOS_FORCEINLINE_FUNCTION
-  auto GetDim(const int i) const { return data.GetDim(i); }
+  auto GetDim(const int i) const {
+    PARTHENON_REQUIRE(0 < i && i <= 6, "ParArrayNDGenerics are max 6D");
+    return dims_[i - 1];
+  }
+
+  KOKKOS_FORCEINLINE_FUNCTION
+  auto NumComponents() const {
+    return dims_[5] * dims_[4] * dims_[3] * dims_[2] * dims_[1];
+  }
 
   ///< retrieve metadata for variable
   inline const Metadata metadata() const { return m_; }
@@ -295,12 +303,13 @@ class ParticleVariable {
   /// return information string
   std::string info() const;
 
-  ParArrayND<T> data;
-
  private:
-  int npool_;
   Metadata m_;
   std::string label_;
+  std::array<int, 6> dims_;
+
+ public:
+  ParArrayND<T> data;
 };
 
 template <typename T>

@@ -382,6 +382,12 @@ class SwarmVariablePack {
   ParArray3D<T> &operator()(const int n) const { return v_(n); }
   KOKKOS_FORCEINLINE_FUNCTION
   T &operator()(const int n, const int i) const { return v_(n)(0, 0, i); }
+  KOKKOS_FORCEINLINE_FUNCTION
+  T &operator()(const int n, const int j, const int i) const { return v_(n)(0, j, i); }
+  KOKKOS_FORCEINLINE_FUNCTION
+  T &operator()(const int n, const int k, const int j, const int i) const {
+    return v_(n)(k, j, i);
+  }
 
  private:
   ViewOfParArrays<T> v_;
@@ -581,17 +587,20 @@ void FillSwarmVarView(const vpack_types::SwarmVarList<T> &vars, PackIndexMap *vm
   int vindex = 0;
   int sparse_start;
   std::string sparse_name;
-  // TODO(BRR) Remove the logic for sparse variables
   for (const auto v : vars) {
-    if (vmap != nullptr) {
-      vmap->insert(sparse_name, IndexPair(sparse_start, vindex - 1));
-      sparse_name = "";
-    }
     int vstart = vindex;
     // Reusing ViewOfParArrays which expects 3D slices
     host_view(vindex++) = v->data.Get(0, 0, 0);
+
+    std::vector<int> shape;
+    if (v->GetDim(2) > 1) shape.push_back(v->GetDim(2));
+    if (v->GetDim(3) > 1) shape.push_back(v->GetDim(3));
+    if (v->GetDim(4) > 1) shape.push_back(v->GetDim(4));
+    if (v->GetDim(5) > 1) shape.push_back(v->GetDim(5));
+    if (v->GetDim(6) > 1) shape.push_back(v->GetDim(6));
+
     if (vmap != nullptr) {
-      vmap->insert(v->label(), IndexPair(vstart, vindex - 1));
+      vmap->insert(v->label(), IndexPair(vstart, vindex - 1), shape);
     }
   }
 
