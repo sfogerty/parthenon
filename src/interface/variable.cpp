@@ -42,11 +42,6 @@ CellVariable<T>::CellVariable(const std::string &base_name, const Metadata &meta
 
   if (IsSet(Metadata::FillGhost)) {
     auto pmb = wpmb.lock();
-    printf("dims: %i %i %i %i %i %i\n", GetDim(1), GetDim(2), GetDim(3), GetDim(4), GetDim(5), GetDim(6));
-    printf("NumComponents: %i\n", NumComponents());
-    PARTHENON_REQUIRE_THROWS(
-        GetDim(4) == NumComponents(),
-        "CellCenteredBoundaryVariable currently only supports rank-1 variables");
     vbvar = std::make_shared<CellCenteredBoundaryVariable>(
         pmb, IsSparse(), label(), GetDim(4), GetDim(5), GetDim(6));
     auto res = pmb->pbval->bvars.insert({label(), vbvar});
