@@ -49,7 +49,7 @@ Packages_t ProcessPackages(std::unique_ptr<ParameterInput> &pin) {
 
 // initial particle position: x,y,z,vx,vy,vz
 constexpr int num_test_particles = 14;
-const std::array<std::array<Real, 6>, num_test_particles> particles_ic = {{
+const Kokkos::Array<Kokkos::Array<Real, 6>, num_test_particles> particles_ic = {{
     {-0.1, 0.2, 0.3, 1.0, 0.0, 0.0},   // along x direction
     {0.4, -0.1, 0.3, 0.0, 1.0, 0.0},   // along y direction
     {-0.1, 0.3, 0.2, 0.0, 0.0, 0.5},   // along z direction
@@ -278,25 +278,6 @@ TaskStatus WriteParticleLog(BlockList_t &blocks, int ncycle) {
   return TaskStatus::complete;
 }
 
-// initial particle position: x,y,z,vx,vy,vz
-constexpr int num_test_particles = 14;
-const Kokkos::Array<Kokkos::Array<Real, 6>, num_test_particles> particles_ic = {{
-    {-0.1, 0.2, 0.3, 1.0, 0.0, 0.0},   // along x direction
-    {0.4, -0.1, 0.3, 0.0, 1.0, 0.0},   // along y direction
-    {-0.1, 0.3, 0.2, 0.0, 0.0, 0.5},   // along z direction
-    {0.0, 0.0, 0.0, -1.0, 0.0, 0.0},   // along -x direction
-    {0.0, 0.0, 0.0, 0.0, -1.0, 0.0},   // along -y direction
-    {0.0, 0.0, 0.0, 0.0, 0.0, -1.0},   // along -z direction
-    {0.0, 0.0, 0.0, 1.0, 1.0, 1.0},    // along xyz diagonal
-    {0.0, 0.0, 0.0, -1.0, 1.0, 1.0},   // along -xyz diagonal
-    {0.0, 0.0, 0.0, 1.0, -1.0, 1.0},   // along x-yz diagonal
-    {0.0, 0.0, 0.0, 1.0, 1.0, -1.0},   // along xy-z diagonal
-    {0.0, 0.0, 0.0, -1.0, -1.0, 1.0},  // along -x-yz diagonal
-    {0.0, 0.0, 0.0, 1.0, -1.0, -1.0},  // along x-y-z diagonal
-    {0.0, 0.0, 0.0, -1.0, 1.0, -1.0},  // along -xy-z diagonal
-    {0.0, 0.0, 0.0, -1.0, -1.0, -1.0}, // along -x-y-z diagonal
-}};
-
 void ProblemGenerator(MeshBlock *pmb, ParameterInput *pin) {
   auto pkg = pmb->packages.Get("particles_package");
   auto swarm = pmb->swarm_data.Get()->Get("my particles");
@@ -354,9 +335,9 @@ void ProblemGenerator(MeshBlock *pmb, ParameterInput *pin) {
         const auto &m = ids_this_block(n);
 
         id(n) = m; // global unique id
-        x(n) = ic.[m][0];
-        y(n) = ic.[m][1];
-        z(n) = ic.[m][2];
+        x(n) = ic[m][0];
+        y(n) = ic[m][1];
+        z(n) = ic[m][2];
         v(0, n) = ic[m][3];
         v(1, n) = ic[m][4];
         v(2, n) = ic[m][5];
