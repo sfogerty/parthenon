@@ -23,7 +23,75 @@
 
 namespace parthenon {
 namespace cell_centered_refinement {
-void Restrict(cell_centered_bvars::BufferCache_t &info, IndexShape &cellbounds,
+
+// For CommBufferCache, convert to RefineBufferCache and then call Restrict to account for
+// different ParArray shapes
+void Restrict(cell_centered_bvars::CommBufferCache_t &comm_info, IndexShape &cellbounds,
+              IndexShape &c_cellbounds, MeshData<Real> *md) {
+  auto comm_info_h = Kokkos::create_mirror_view_and_copy(HostMemSpace(), comm_info);
+  int b = 0; // buffer index
+  int n_refine_buf = 0;
+  for (auto block = 0; block < md->NumBlocks(); block++) {
+    auto &rc = md->GetBlockData(block);
+    auto pmb = rc->GetBlockPointer();
+    for (auto &v : rc->GetCellVariableVector()) {
+      if (v->IsSet(Metadata::FillGhost)) {
+        for (int n = 0; n < pmb->pbval->nneighbor; n++) {
+          n_refine_buf += comm_info_h(b).Nt * comm_info_h(b).Nu;
+          b++;
+        }
+      }
+    }
+  }
+
+  auto refine_info =
+      cell_centered_bvars::RefineBufferCache_t("refine_boundary_info", n_refine_buf);
+  auto refine_info_h = Kokkos::create_mirror_view(refine_info);
+  b = 0;      // Index of refine_info
+  int bb = 0; // Index of boundary_info
+  for (auto block = 0; block < md->NumBlocks(); block++) {
+    auto &rc = md->GetBlockData(block);
+    auto pmb = rc->GetBlockPointer();
+    for (auto &v : rc->GetCellVariableVector()) {
+      if (v->IsSet(Metadata::FillGhost)) {
+        for (int n = 0; n < pmb->pbval->nneighbor; n++) {
+          for (int t = 0; t < comm_info_h(bb).Nt; t++) {
+            for (int u = 0; u < comm_info_h(bb).Nu; u++) {
+              refine_info_h(b).si = comm_info_h(bb).si;
+              refine_info_h(b).ei = comm_info_h(bb).ei;
+              refine_info_h(b).sj = comm_info_h(bb).sj;
+              refine_info_h(b).ej = comm_info_h(bb).ej;
+              refine_info_h(b).sk = comm_info_h(bb).sk;
+              refine_info_h(b).ek = comm_info_h(bb).ek;
+              refine_info_h(b).Nv = comm_info_h(bb).Nv;
+              refine_info_h(b).allocated = comm_info_h(bb).allocated;
+              refine_info_h(b).restriction = comm_info_h(bb).restriction;
+              refine_info_h(b).coords = comm_info_h(bb).coords;
+              refine_info_h(b).coarse_coords = comm_info_h(bb).coarse_coords;
+              refine_info_h(b).buf = comm_info_h(bb).buf;
+              refine_info_h(b).var =
+                  Kokkos::subview(comm_info_h(bb).var, t, u, Kokkos::ALL(), Kokkos::ALL(),
+                                  Kokkos::ALL(), Kokkos::ALL());
+              refine_info_h(b).fine =
+                  Kokkos::subview(comm_info_h(bb).fine, t, u, Kokkos::ALL(),
+                                  Kokkos::ALL(), Kokkos::ALL(), Kokkos::ALL());
+              refine_info_h(b).coarse =
+                  Kokkos::subview(comm_info_h(bb).coarse, t, u, Kokkos::ALL(),
+                                  Kokkos::ALL(), Kokkos::ALL(), Kokkos::ALL());
+              b++;
+            }
+          }
+          bb++;
+        }
+      }
+    }
+  }
+  Kokkos::deep_copy(refine_info, refine_info_h);
+
+  Restrict(refine_info, cellbounds, c_cellbounds);
+}
+
+void Restrict(cell_centered_bvars::RefineBufferCache_t &info, IndexShape &cellbounds,
               IndexShape &c_cellbounds) {
   const IndexDomain interior = IndexDomain::interior;
   const IndexDomain entire = IndexDomain::entire;
@@ -186,8 +254,8 @@ void ComputePhysicalRestrictBounds(MeshData<Real> *md) {
   Kokkos::Profiling::pushRegion("ComputePhysicalRestrictBounds_MeshData");
   auto alloc_status = ComputePhysicalRestrictBoundsAllocStatus(md);
 
-  cell_centered_bvars::BufferCache_t info("physical restriction bounds",
-                                          alloc_status.size());
+  cell_centered_bvars::RefineBufferCache_t info("physical restriction bounds",
+                                                alloc_status.size());
   auto info_h = Kokkos::create_mirror_view(info);
   int idx = 0;
   for (int block = 0; block < md->NumBlocks(); ++block) {
