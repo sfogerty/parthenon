@@ -30,13 +30,13 @@
 namespace particles_example {
 
 std::unique_ptr<ParticleBound, DeviceDeleter<parthenon::DevMemSpace>>
-SetSwarmIx1UserBC() {
-  return DeviceAllocate<ParticleBoundIX1Outflow>();
+SetSwarmIX1UserBC() {
+  return DeviceAllocate<ParticleBoundIX1User>();
 }
 
 std::unique_ptr<ParticleBound, DeviceDeleter<parthenon::DevMemSpace>>
-SetSwarmOx1UserBC() {
-  return DeviceAllocate<ParticleBoundOX1Outflow>();
+SetSwarmOX1UserBC() {
+  return DeviceAllocate<ParticleBoundOX1User>();
 }
 
 Packages_t ProcessPackages(std::unique_ptr<ParameterInput> &pin) {
