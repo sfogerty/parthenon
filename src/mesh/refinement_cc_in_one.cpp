@@ -66,7 +66,7 @@ void Restrict(cell_centered_bvars::CommBufferCache_t &comm_info, IndexShape &cel
               refine_info_h(b).Nv = comm_info_h(bb).Nv;
               refine_info_h(b).allocated = comm_info_h(bb).allocated;
               refine_info_h(b).restriction = comm_info_h(bb).restriction;
-              if (comm_info_h(bb).allocated && comm_info_h(bb).restriction) {
+              if (refine_info_h(b).allocated && refine_info_h(b).restriction) {
                 refine_info_h(b).coords = comm_info_h(bb).coords;
                 refine_info_h(b).coarse_coords = comm_info_h(bb).coarse_coords;
                 refine_info_h(b).buf = comm_info_h(bb).buf;
