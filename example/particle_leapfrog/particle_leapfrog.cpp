@@ -47,25 +47,6 @@ Packages_t ProcessPackages(std::unique_ptr<ParameterInput> &pin) {
   return packages;
 }
 
-// initial particle position: x,y,z,vx,vy,vz
-constexpr int num_test_particles = 14;
-const Kokkos::Array<Kokkos::Array<Real, 6>, num_test_particles> particles_ic = {{
-    {-0.1, 0.2, 0.3, 1.0, 0.0, 0.0},   // along x direction
-    {0.4, -0.1, 0.3, 0.0, 1.0, 0.0},   // along y direction
-    {-0.1, 0.3, 0.2, 0.0, 0.0, 0.5},   // along z direction
-    {0.0, 0.0, 0.0, -1.0, 0.0, 0.0},   // along -x direction
-    {0.0, 0.0, 0.0, 0.0, -1.0, 0.0},   // along -y direction
-    {0.0, 0.0, 0.0, 0.0, 0.0, -1.0},   // along -z direction
-    {0.0, 0.0, 0.0, 1.0, 1.0, 1.0},    // along xyz diagonal
-    {0.0, 0.0, 0.0, -1.0, 1.0, 1.0},   // along -xyz diagonal
-    {0.0, 0.0, 0.0, 1.0, -1.0, 1.0},   // along x-yz diagonal
-    {0.0, 0.0, 0.0, 1.0, 1.0, -1.0},   // along xy-z diagonal
-    {0.0, 0.0, 0.0, -1.0, -1.0, 1.0},  // along -x-yz diagonal
-    {0.0, 0.0, 0.0, 1.0, -1.0, -1.0},  // along x-y-z diagonal
-    {0.0, 0.0, 0.0, -1.0, 1.0, -1.0},  // along -xy-z diagonal
-    {0.0, 0.0, 0.0, -1.0, -1.0, -1.0}, // along -x-y-z diagonal
-}};
-
 // *************************************************//
 // define the "physics" package particles_package, *//
 // which includes defining various functions that  *//
@@ -275,6 +256,25 @@ TaskStatus WriteParticleLog(BlockList_t &blocks, int ncycle) {
 
   return TaskStatus::complete;
 }
+
+// initial particle position: x,y,z,vx,vy,vz
+constexpr int num_test_particles = 14;
+const Kokkos::Array<Kokkos::Array<Real, 6>, num_test_particles> particles_ic = {{
+    {-0.1, 0.2, 0.3, 1.0, 0.0, 0.0},   // along x direction
+    {0.4, -0.1, 0.3, 0.0, 1.0, 0.0},   // along y direction
+    {-0.1, 0.3, 0.2, 0.0, 0.0, 0.5},   // along z direction
+    {0.0, 0.0, 0.0, -1.0, 0.0, 0.0},   // along -x direction
+    {0.0, 0.0, 0.0, 0.0, -1.0, 0.0},   // along -y direction
+    {0.0, 0.0, 0.0, 0.0, 0.0, -1.0},   // along -z direction
+    {0.0, 0.0, 0.0, 1.0, 1.0, 1.0},    // along xyz diagonal
+    {0.0, 0.0, 0.0, -1.0, 1.0, 1.0},   // along -xyz diagonal
+    {0.0, 0.0, 0.0, 1.0, -1.0, 1.0},   // along x-yz diagonal
+    {0.0, 0.0, 0.0, 1.0, 1.0, -1.0},   // along xy-z diagonal
+    {0.0, 0.0, 0.0, -1.0, -1.0, 1.0},  // along -x-yz diagonal
+    {0.0, 0.0, 0.0, 1.0, -1.0, -1.0},  // along x-y-z diagonal
+    {0.0, 0.0, 0.0, -1.0, 1.0, -1.0},  // along -xy-z diagonal
+    {0.0, 0.0, 0.0, -1.0, -1.0, -1.0}, // along -x-y-z diagonal
+}};
 
 void ProblemGenerator(MeshBlock *pmb, ParameterInput *pin) {
   auto pkg = pmb->packages.Get("particles_package");
