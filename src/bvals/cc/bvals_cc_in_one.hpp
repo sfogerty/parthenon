@@ -41,6 +41,8 @@ void CalcIndicesLoadSame(int ox, int &s, int &e, const IndexRange &bounds);
 void CalcIndicesLoadToFiner(int &si, int &ei, int &sj, int &ej, int &sk, int &ek,
                             const NeighborBlock &nb, MeshBlock *pmb);
 TaskStatus SendBoundaryBuffers(std::shared_ptr<MeshData<Real>> &md);
+enum class CommDest { local, remote };
+TaskStatus SendBoundaryBuffersSplit(std::shared_ptr<MeshData<Real>> &md, CommDest dest);
 TaskStatus ReceiveBoundaryBuffers(std::shared_ptr<MeshData<Real>> &md);
 TaskStatus SetBoundaries(std::shared_ptr<MeshData<Real>> &md);
 
@@ -55,6 +57,7 @@ struct BndInfo {
   int Nv = 0;
   bool allocated = true;
   bool restriction = false;
+  bool mpi = false;
   Coordinates_t coords, coarse_coords; // coords
   parthenon::BufArray1D<Real> buf;     // comm buffer
   parthenon::ParArray4D<Real> var;     // data variable used for comms

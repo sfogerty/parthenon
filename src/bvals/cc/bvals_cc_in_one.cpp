@@ -374,10 +374,12 @@ void ResetSendBufferBoundaryInfo(MeshData<Real> *md, std::vector<bool> alloc_sta
           // target buffer directly
           if ((nb.snb.rank == parthenon::Globals::my_rank) &&
               v->vbvar->IsLocalNeighborAllocated(n)) {
+            boundary_info_h(b).mpi = false;
             auto target_block = pmb->pmy_mesh->FindMeshBlock(nb.snb.gid);
             boundary_info_h(b).buf =
                 target_block->pbval->bvars.at(v->label())->GetPBdVar()->recv[nb.targetid];
           } else {
+            boundary_info_h(b).mpi = true;
             boundary_info_h(b).buf = pbd_var_->send[nb.bufid];
           }
           b++;
@@ -401,7 +403,7 @@ void ResetSendBufferBoundaryInfo(MeshData<Real> *md, std::vector<bool> alloc_sta
 //         sets flag to arrived for buffers on MeshBlocks on the same rank as data between
 //         those has already been copied directly.
 
-void SendAndNotify(MeshData<Real> *md) {
+void SendAndNotify(MeshData<Real> *md, CommDest dest) {
   Kokkos::Profiling::pushRegion("Set complete and/or start sending via MPI");
 
   // copy sending_nonzero_flags to host
@@ -430,6 +432,9 @@ void SendAndNotify(MeshData<Real> *md) {
 
           // on the same rank the data has been directly copied to the target buffer
           if (nb.snb.rank == parthenon::Globals::my_rank) {
+            if (dest != CommDest::local) {
+              continue;
+            }
             auto target_block = pmb->pmy_mesh->FindMeshBlock(nb.snb.gid);
 
 #ifdef ENABLE_SPARSE
@@ -474,6 +479,9 @@ void SendAndNotify(MeshData<Real> *md) {
                 parthenon::BoundaryStatus::arrived;
           } else {
 #ifdef MPI_PARALLEL
+            if (dest != CommDest::remote) {
+              continue;
+            }
             // call MPI_Start even if variable is not allocated, because receiving block
             // is waiting for data
             PARTHENON_MPI_CHECK(MPI_Start(&(pbd_var_->req_send[nb.bufid])));
@@ -500,6 +508,10 @@ void SendAndNotify(MeshData<Real> *md) {
 
 // TODO(pgrete) should probably be moved to the bvals or interface folders
 TaskStatus SendBoundaryBuffers(std::shared_ptr<MeshData<Real>> &md) {
+  SendBoundaryBuffersSplit(md, CommDest::remote);
+  return SendBoundaryBuffersSplit(md, CommDest::local);
+}
+TaskStatus SendBoundaryBuffersSplit(std::shared_ptr<MeshData<Real>> &md, CommDest dest) {
   Kokkos::Profiling::pushRegion("Task_SendBoundaryBuffers_MeshData");
 
   auto boundary_info = md->GetSendBuffers();
@@ -513,7 +525,9 @@ TaskStatus SendBoundaryBuffers(std::shared_ptr<MeshData<Real>> &md) {
     ResetSendBufferBoundaryInfo(md.get(), alloc_status);
     boundary_info = md->GetSendBuffers();
     sending_nonzero_flags = md->GetSendingNonzeroFlags();
-  } else {
+    // Will only restrict all blocks once so it's done for "remote" because remote
+    // buffers should also be send first.
+  } else if (dest == CommDest::remote) {
     Kokkos::Profiling::pushRegion("Restrict boundaries");
     // Get coarse and fine bounds. Same for all blocks.
     auto &rc = md->GetBlockData(0);
@@ -528,12 +542,16 @@ TaskStatus SendBoundaryBuffers(std::shared_ptr<MeshData<Real>> &md) {
   }
 
   const Real threshold = Globals::sparse_config.allocation_threshold;
+  const bool mpi = dest == CommDest::remote;
 
   Kokkos::parallel_for(
       "SendBoundaryBuffers",
       Kokkos::TeamPolicy<>(parthenon::DevExecSpace(), alloc_status.size(), Kokkos::AUTO),
       KOKKOS_LAMBDA(parthenon::team_mbr_t team_member) {
         const int b = team_member.league_rank();
+        if (boundary_info(b).mpi != mpi) {
+          return;
+        }
         const int &si = boundary_info(b).si;
         const int &ei = boundary_info(b).ei;
         const int &sj = boundary_info(b).sj;
@@ -595,10 +613,12 @@ TaskStatus SendBoundaryBuffers(std::shared_ptr<MeshData<Real>> &md) {
 
 #ifdef MPI_PARALLEL
   // Ensure buffer filling kernel finished before MPI_Start is called in the following
-  Kokkos::fence();
+  if (dest == CommDest::remote) {
+    Kokkos::fence();
+  }
 #endif
 
-  SendAndNotify(md.get());
+  SendAndNotify(md.get(), dest);
 
   Kokkos::Profiling::popRegion(); // Task_SendBoundaryBuffers_MeshData
   return TaskStatus::complete;
