@@ -360,6 +360,9 @@ class VariablePack {
   // public field, with accessors for convenience
   ParArray0D<Coordinates_t> coords;
 
+  KOKKOS_FORCEINLINE_FUNCTION 
+  std::size_t size() const {return v_.size();}
+
  protected:
   ViewOfParArrays<T> v_;
   ParArray1D<int> sparse_ids_;
@@ -416,6 +419,11 @@ class VariableFluxPack : public VariablePack<T> {
   const ViewOfParArrays<T> &flux(const int dir) const {
     assert(dir > 0 && dir <= this->ndim_);
     return f_[dir - 1];
+  }
+
+  KOKKOS_FORCEINLINE_FUNCTION 
+  const auto& flux(const int dir, const int n) const { 
+    return flux(dir)(n);
   }
 
 #ifdef ENABLE_SPARSE
