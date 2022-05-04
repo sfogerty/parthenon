@@ -711,6 +711,7 @@ void Mesh::RedistributeAndRefineMeshBlocks(ParameterInput *pin, ApplicationInput
       if ((ranklist[on] == Globals::my_rank) && (loclist[on].level == newloc[n].level)) {
         // on the same MPI rank and same level -> just move it
         new_block_list[n - nbs] = FindMeshBlock(on);
+        for (auto& stage : new_block_list[n - nbs]->meshblock_data.Stages()) stage.second->ClearCaches();
       } else {
         // on a different refinement level or MPI rank - create a new block
         BoundaryFlag block_bcs[6];
