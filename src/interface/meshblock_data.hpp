@@ -433,6 +433,12 @@ class MeshBlockData {
     return true;
   }
 
+  void ClearCaches() {
+    varPackMap_.clear();
+    varFluxPackMap_.clear();
+    varFluxPackMap_.clear();
+  }
+
  private:
   void AddField(const std::string &base_name, const Metadata &metadata,
                 int sparse_id = InvalidSparseID);
