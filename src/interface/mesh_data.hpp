@@ -129,7 +129,8 @@ const MeshBlockPack<P> &PackOnMesh(M &map, BlockDataList_t<Real> &block_data_,
       assert(this_map == pack_idx_map);
     }
   }
-
+  
+  /*
   auto itr = map.find(total_key);
   bool make_new_pack = false;
   if (itr == map.end()) {
@@ -143,6 +144,12 @@ const MeshBlockPack<P> &PackOnMesh(M &map, BlockDataList_t<Real> &block_data_,
       map.erase(itr);
     }
   }
+  */
+  
+  auto itr = map.find(total_key);
+  if (itr != map.end()) map.erase(itr);
+  bool make_new_pack = true;
+  
 
   if (make_new_pack) {
     ParArray1D<P> packs("MeshData::PackVariables::packs", nblocks);

@@ -214,7 +214,8 @@ const VariableFluxPack<T> &MeshBlockData<T>::PackListedVariablesAndFluxes(
     vpack_types::StringPair *key) {
   vpack_types::StringPair keys =
       std::make_pair(std::move(var_list.labels()), std::move(flux_list.labels()));
-
+  
+  /*
   auto itr = varFluxPackMap_.find(keys);
   bool make_new_pack = false;
   if (itr == varFluxPackMap_.end()) {
@@ -229,7 +230,12 @@ const VariableFluxPack<T> &MeshBlockData<T>::PackListedVariablesAndFluxes(
       varFluxPackMap_.erase(itr);
     }
   }
-
+  */
+   
+  auto itr = varFluxPackMap_.find(keys);
+  if (itr != varFluxPackMap_.end()) varFluxPackMap_.erase(itr);
+  bool make_new_pack = true;
+  
   if (make_new_pack) {
     FluxPackIndxPair<T> new_item;
     new_item.alloc_status = var_list.alloc_status();
@@ -267,7 +273,8 @@ MeshBlockData<T>::PackListedVariables(const VarLabelList &var_list, bool coarse,
                                       std::vector<std::string> *key_out) {
   const auto &key = var_list.labels();
   auto &packmap = coarse ? coarseVarPackMap_ : varPackMap_;
-
+  
+  /*
   auto itr = packmap.find(key);
   bool make_new_pack = false;
   if (itr == packmap.end()) {
@@ -281,6 +288,12 @@ MeshBlockData<T>::PackListedVariables(const VarLabelList &var_list, bool coarse,
       packmap.erase(itr);
     }
   }
+  */
+  
+  auto itr = packmap.find(key);
+  bool make_new_pack = true;
+  if (itr != packmap.end()) packmap.erase(itr);
+  
 
   if (make_new_pack) {
     PackIndxPair<T> new_item;
