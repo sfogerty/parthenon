@@ -126,11 +126,23 @@ AmrTag CheckRefinement(MeshBlockData<Real> *rc) {
       ib.e,
       KOKKOS_LAMBDA(const int n, const int k, const int j, const int i,
                     typename Kokkos::MinMax<Real>::value_type &lminmax) {
-        if (v.IsAllocated(n)) {
-          lminmax.min_val =
-              (v(n, k, j, i) < lminmax.min_val ? v(n, k, j, i) : lminmax.min_val);
-          lminmax.max_val =
-              (v(n, k, j, i) > lminmax.max_val ? v(n, k, j, i) : lminmax.max_val);
+        const Real max = lminmax.max_val;
+        const Real min = lminmax.min_val;
+        
+        assert(v.size() > n);
+        if (v.IsAllocated(n) && v(n).size() > 0) {
+          const auto& vn = v(n);
+          assert(vn.size() > 0);
+          assert(vn.extent(0) > k); 
+          assert(vn.extent(1) > j); 
+          assert(vn.extent(2) > i); 
+          assert(i >= 0); 
+          assert(j >= 0); 
+          assert(k >= 0); 
+          const Real val = vn(k, j, i);
+
+          lminmax.min_val = (val < min ? val : min);
+          lminmax.max_val = (val > max ? val : max);
         }
       },
       Kokkos::MinMax<Real>(minmax));

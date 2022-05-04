@@ -39,6 +39,22 @@ namespace Update {
 KOKKOS_FORCEINLINE_FUNCTION
 Real FluxDivHelper(const int l, const int k, const int j, const int i, const int ndim,
                    const Coordinates_t &coords, const VariableFluxPack<Real> &v) {
+  // Check we have at leas l fields in this VariableFluxPack
+  assert(v.size() > l);
+  assert(v.flux(X1DIR).size() > l); 
+  
+  // Make sure both variables are allocated 
+  assert(v(l).size() > 0);
+  assert(v.flux(X1DIR, l).size() > 0);
+  
+  // The size of the variable should be the same as that of a single component of the flux 
+  assert(v(l).size() == v.flux(X1DIR, l).size());
+
+  // Make sure that we are within the bounds of the flux array
+  assert(v.flux(X1DIR, l).extent(0) > k);
+  assert(v.flux(X1DIR, l).extent(1) > j);
+  assert(v.flux(X1DIR, l).extent(2) > i + 1);
+
   Real du = (coords.Area(X1DIR, k, j, i + 1) * v.flux(X1DIR, l, k, j, i + 1) -
              coords.Area(X1DIR, k, j, i) * v.flux(X1DIR, l, k, j, i));
   if (ndim >= 2) {
