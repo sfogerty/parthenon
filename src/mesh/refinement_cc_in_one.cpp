@@ -35,6 +35,8 @@ void Restrict(cell_centered_bvars::BufferCache_t &info, IndexShape &cellbounds,
   auto jb = cellbounds.GetBoundsJ(interior);
   auto ib = cellbounds.GetBoundsI(interior);
 
+  // TODO(BRR) nbuffers is currently always 1. In the future nbuffers could be > 1 to
+  // improve performance.
   const int nbuffers = info.extent_int(0);
   const int scratch_level = 1; // 0 is actual scratch (tiny); 1 is HBM
   size_t scratch_size_in_bytes = 1;
@@ -92,7 +94,7 @@ void Restrict(cell_centered_bvars::BufferCache_t &info, IndexShape &cellbounds,
             const int k = kb.s;
             par_for_inner(
                 inner_loop_pattern_ttr_tag, team_member, 0, info(buf).Nt - 1, 0,
-                info(buf).Nv - 1, 0, info(buf).Nv - 1, info(buf).sj, info(buf).ej,
+                info(buf).Nu - 1, 0, info(buf).Nv - 1, info(buf).sj, info(buf).ej,
                 info(buf).si, info(buf).ei,
                 [&](const int l, const int m, const int n, const int cj, const int ci) {
                   const int j = (cj - cjb.s) * 2 + jb.s;
