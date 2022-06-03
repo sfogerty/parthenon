@@ -336,7 +336,7 @@ class Metadata {
     PARTHENON_THROW("No topology flag set");
   }
 
-  bool IsMeshTied() const { return (Where() != None && Where() != Particle); }
+  bool IsMeshTied() const { return (Where() != None); }
 
   /// returns the type of the variable
   MetadataFlag Type() const {

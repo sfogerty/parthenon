@@ -213,6 +213,8 @@ class Swarm {
  private:
   template <class T>
   vpack_types::SwarmVarList<T> MakeVarListAll_();
+  template <class T>
+  vpack_types::SwarmVarList<T> MakeVarList_(const std::vector<std::string> &names);
 
   template <class BOutflow, class BPeriodic, int iFace>
   void AllocateBoundariesImpl_(MeshBlock *pmb);
@@ -227,8 +229,7 @@ class Swarm {
                                            ParArrayND<int> &buffer_index);
 
   template <class T>
-  SwarmVariablePack<T> PackAllVariables_(PackIndexMap &vmap,
-                                         ParArrayND<int> &pack_indices_shapes);
+  SwarmVariablePack<T> PackAllVariables_(PackIndexMap &vmap);
 
   int debug = 0;
   std::weak_ptr<MeshBlock> pmy_block;
@@ -275,6 +276,18 @@ class Swarm {
 };
 
 template <class T>
+inline vpack_types::SwarmVarList<T>
+Swarm::MakeVarList_(const std::vector<std::string> &names) {
+  vpack_types::SwarmVarList<T> vars;
+  auto variables = std::get<getType<T>()>(Maps_);
+
+  for (auto name : names) {
+    vars.push_front(variables[name]);
+  }
+  return vars;
+}
+
+template <class T>
 inline vpack_types::SwarmVarList<T> Swarm::MakeVarListAll_() {
   int size = 0;
   vpack_types::SwarmVarList<T> vars;
@@ -290,7 +303,7 @@ inline vpack_types::SwarmVarList<T> Swarm::MakeVarListAll_() {
 template <class T>
 inline SwarmVariablePack<T> Swarm::PackVariables(const std::vector<std::string> &names,
                                                  PackIndexMap &vmap) {
-  vpack_types::SwarmVarList<T> vars = MakeVarListAll_<T>();
+  vpack_types::SwarmVarList<T> vars = MakeVarList_<T>(names);
   auto pack = MakeSwarmPack<T>(vars, &vmap);
   SwarmPackIndxPair<T> value;
   value.pack = pack;
@@ -299,8 +312,7 @@ inline SwarmVariablePack<T> Swarm::PackVariables(const std::vector<std::string> 
 }
 
 template <class T>
-inline SwarmVariablePack<T>
-Swarm::PackAllVariables_(PackIndexMap &vmap, ParArrayND<int> &pack_indices_shapes) {
+inline SwarmVariablePack<T> Swarm::PackAllVariables_(PackIndexMap &vmap) {
   std::vector<std::string> names;
   names.reserve(std::get<getType<T>()>(Vectors_).size());
   for (const auto &v : std::get<getType<T>()>(Vectors_)) {
@@ -308,41 +320,6 @@ Swarm::PackAllVariables_(PackIndexMap &vmap, ParArrayND<int> &pack_indices_shape
   }
 
   auto ret = PackVariables<T>(names, vmap);
-  auto map = vmap.Map();
-
-  // Pack variables in terms of
-  // [variable_start] [dim2] [dim1] [swarm idx]
-  // for conveniently looping over all variables to fill buffers.
-  // Note that this supports up to 2D ParticleVariable data.
-  // The structure of the pack is stored in pack_indices_shapes.
-  // pack_indices_shapes(0, n) is [variable_start] for the nth variable
-  // pack_indices_shapes(1, n) is [dim1] for the nth variable
-  // pack_indices_shapes(2, n) is [dim2] for the nth variable
-  // Currently, pack_indices_shapes([3,4,5], n) = 1 i.e. these dimensions are not used in
-  // ParticleVariables.
-
-  // Get shape of packed variables
-  if (names.size() > 0) {
-    pack_indices_shapes = ParArrayND<int>("Pack indices and shapes", 6, names.size());
-    auto pack_indices_shapes_h = pack_indices_shapes.GetHostMirror();
-    int n = 0;
-    for (auto &m : map) {
-      pack_indices_shapes_h(0, n) = m.second.first;
-      for (int idx = 1; idx < 6; idx++) {
-        auto shape = vmap.GetShape(m.first);
-        PARTHENON_REQUIRE(shape.size() <= 2,
-                          "Flat packs only support 2 indices + swarm index!");
-        if (shape.size() >= idx) {
-          pack_indices_shapes_h(idx, n) = shape[idx - 1];
-        } else {
-          pack_indices_shapes_h(idx, n) = 1;
-        }
-      }
-      n++;
-    }
-    pack_indices_shapes.DeepCopy(pack_indices_shapes_h);
-  }
-
   return ret;
 }
 

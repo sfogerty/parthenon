@@ -408,33 +408,23 @@ void Swarm::Defrag() {
   auto &realVector_ = std::get<getType<Real>()>(Vectors_);
   PackIndexMap real_imap;
   PackIndexMap int_imap;
-  ParArrayND<int> rpack_indices_shapes;
-  ParArrayND<int> ipack_indices_shapes;
-  auto vreal = PackAllVariables_<Real>(real_imap, rpack_indices_shapes);
-  auto vint = PackAllVariables_<int>(int_imap, ipack_indices_shapes);
+  auto vreal = PackAllVariables_<Real>(real_imap);
+  auto vint = PackAllVariables_<int>(int_imap);
   int real_vars_size = realVector_.size();
   int int_vars_size = intVector_.size();
   auto real_map = real_imap.Map();
   auto int_map = int_imap.Map();
+  const int realPackDim = vreal.GetDim(2);
+  const int intPackDim = vint.GetDim(2);
 
   pmb->par_for(
       "Swarm::DefragVariables", 0, max_active_index_, KOKKOS_LAMBDA(const int n) {
         if (from_to_indices(n) >= 0) {
-          for (int i = 0; i < real_vars_size; i++) {
-            for (int j = 0; j < rpack_indices_shapes(1, i); j++) {
-              for (int k = 0; k < rpack_indices_shapes(2, i); k++) {
-                vreal(rpack_indices_shapes(0, i), k, j, from_to_indices(n)) =
-                    vreal(rpack_indices_shapes(0, i), k, j, n);
-              }
-            }
+          for (int vidx = 0; vidx < realPackDim; vidx++) {
+            vreal(vidx, from_to_indices(n)) = vreal(vidx, n);
           }
-          for (int i = 0; i < int_vars_size; i++) {
-            for (int j = 0; j < ipack_indices_shapes(1, i); j++) {
-              for (int k = 0; k < ipack_indices_shapes(2, i); k++) {
-                vint(ipack_indices_shapes(0, i), k, j, from_to_indices(n)) =
-                    vint(ipack_indices_shapes(0, i), k, j, n);
-              }
-            }
+          for (int vidx = 0; vidx < intPackDim; vidx++) {
+            vint(vidx, from_to_indices(n)) = vint(vidx, n);
           }
         }
       });
@@ -880,6 +870,7 @@ int Swarm::CountParticlesToSend_() {
   vbswarm->particle_size = particle_size;
 
   int max_indices_size = 0;
+  int total_noblock_particles = 0;
   for (int n = 0; n <= max_active_index_; n++) {
     if (mask_h(n)) {
       // This particle should be sent
@@ -889,12 +880,32 @@ int Swarm::CountParticlesToSend_() {
           max_indices_size = num_particles_to_send_h(blockIndex_h(n));
         }
       }
+      if (blockIndex_h(n) == no_block_) {
+        total_noblock_particles++;
+      }
     }
   }
   // Size-0 arrays not permitted but we don't want to short-circuit subsequent logic that
   // indicates completed communications
   max_indices_size = std::max<int>(1, max_indices_size);
+
   // Not a ragged-right array, just for convenience
+  if (total_noblock_particles > 0) {
+    auto noblock_indices =
+        ParArrayND<int>("Particles with no block", total_noblock_particles);
+    auto noblock_indices_h = noblock_indices.GetHostMirror();
+    int counter = 0;
+    for (int n = 0; n <= max_active_index_; n++) {
+      if (mask_h(n)) {
+        if (blockIndex_h(n) == no_block_) {
+          noblock_indices_h(counter) = n;
+          counter++;
+        }
+      }
+    }
+    noblock_indices.DeepCopy(noblock_indices_h);
+    ApplyBoundaries_(total_noblock_particles, noblock_indices);
+  }
 
   particle_indices_to_send_ =
       ParArrayND<int>("Particle indices to send", nbmax, max_indices_size);
@@ -937,12 +948,13 @@ void Swarm::LoadBuffers_(const int max_indices_size) {
   auto &realVector_ = std::get<getType<Real>()>(Vectors_);
   PackIndexMap real_imap;
   PackIndexMap int_imap;
-  ParArrayND<int> rpack_indices_shapes;
-  ParArrayND<int> ipack_indices_shapes;
-  auto vreal = PackAllVariables_<Real>(real_imap, rpack_indices_shapes);
-  auto vint = PackAllVariables_<int>(int_imap, ipack_indices_shapes);
-  int real_vars_size = realVector_.size();
-  int int_vars_size = intVector_.size();
+  auto vreal = PackAllVariables_<Real>(real_imap);
+  auto vint = PackAllVariables_<int>(int_imap);
+  const int realPackDim = vreal.GetDim(2);
+  const int intPackDim = vint.GetDim(2);
+
+  // Pack index:
+  // [variable start] [swarm idx]
 
   // Pack index:
   // [variable start] [dim2] [dim1] [swarm idx]
@@ -960,23 +972,13 @@ void Swarm::LoadBuffers_(const int max_indices_size) {
             const int sidx = particle_indices_to_send(m, n);
             int buffer_index = n * particle_size;
             swarm_d.MarkParticleForRemoval(sidx);
-            for (int i = 0; i < real_vars_size; i++) {
-              for (int j = 0; j < rpack_indices_shapes(1, i); j++) {
-                for (int k = 0; k < rpack_indices_shapes(2, i); k++) {
-                  bdvar.send[bufid](buffer_index) =
-                      vreal(rpack_indices_shapes(0, i), k, j, sidx);
-                  buffer_index++;
-                }
-              }
+            for (int i = 0; i < realPackDim; i++) {
+              bdvar.send[bufid](buffer_index) = vreal(i, sidx);
+              buffer_index++;
             }
-            for (int i = 0; i < int_vars_size; i++) {
-              for (int j = 0; j < ipack_indices_shapes(1, i); j++) {
-                for (int k = 0; k < ipack_indices_shapes(2, i); k++) {
-                  bdvar.send[bufid](buffer_index) =
-                      static_cast<Real>(vint(ipack_indices_shapes(0, i), k, j, sidx));
-                  buffer_index++;
-                }
-              }
+            for (int i = 0; i < intPackDim; i++) {
+              bdvar.send[bufid](buffer_index) = static_cast<Real>(vint(i, sidx));
+              buffer_index++;
             }
           }
         }
@@ -1013,7 +1015,7 @@ void Swarm::Send(BoundaryCommSubset phase) {
       int sent_particle_index = 0;
       for (int n = 0; n <= max_active_index_; n++) {
         if (mask_h(n)) {
-          if (blockIndex_h(n) >= 0) {
+          if (blockIndex_h(n) >= 0 || blockIndex_h(n) == no_block_) {
             new_indices_h(sent_particle_index) = n;
             sent_particle_index++;
           }
@@ -1091,12 +1093,10 @@ void Swarm::UnloadBuffers_() {
     auto &realVector_ = std::get<getType<Real>()>(Vectors_);
     PackIndexMap real_imap;
     PackIndexMap int_imap;
-    ParArrayND<int> rpack_indices_shapes;
-    ParArrayND<int> ipack_indices_shapes;
-    auto vreal = PackAllVariables_<Real>(real_imap, rpack_indices_shapes);
-    auto vint = PackAllVariables_<int>(int_imap, ipack_indices_shapes);
-    int real_vars_size = realVector_.size();
-    int int_vars_size = intVector_.size();
+    auto vreal = PackAllVariables_<Real>(real_imap);
+    auto vint = PackAllVariables_<int>(int_imap);
+    int realPackDim = vreal.GetDim(2);
+    int intPackDim = vint.GetDim(2);
 
     // construct map from buffer index to swarm index (or just return vector of indices!)
     const int particle_size = GetParticleDataSize();
@@ -1108,22 +1108,13 @@ void Swarm::UnloadBuffers_() {
           const int nid = neighbor_index(n);
           int bid = buffer_index(n) * particle_size;
           const int nbid = neighbor_buffer_index(nid);
-          for (int i = 0; i < real_vars_size; i++) {
-            for (int j = 0; j < rpack_indices_shapes(1, i); j++) {
-              for (int k = 0; k < rpack_indices_shapes(2, i); k++) {
-                vreal(rpack_indices_shapes(0, i), k, j, sid) = bdvar.recv[nbid](bid);
-                bid++;
-              }
-            }
+          for (int i = 0; i < realPackDim; i++) {
+            vreal(i, sid) = bdvar.recv[nbid](bid);
+            bid++;
           }
-          for (int i = 0; i < int_vars_size; i++) {
-            for (int j = 0; j < ipack_indices_shapes(1, i); j++) {
-              for (int k = 0; k < ipack_indices_shapes(1, i); k++) {
-                vint(ipack_indices_shapes(0, i), k, j, sid) =
-                    static_cast<int>(bdvar.recv[nbid](bid));
-                bid++;
-              }
-            }
+          for (int i = 0; i < intPackDim; i++) {
+            vint(i, sid) = static_cast<int>(bdvar.recv[nbid](bid));
+            bid++;
           }
         });
 
